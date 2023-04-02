@@ -28,11 +28,19 @@ namespace TCPIP
             try
             {
                 pLibrary.LocalIP = txtIP.Text;
-                MessageBox.Show(pLibrary.LocalIP);
+                pLibrary.LocalPort = txtPort.Text;
+                pLibrary.ConnectionType = IPLibrary.SocketType.Client;
+                pLibrary.ConnectionType = IPLibrary.SocketType.Server;
+                pLibrary.Connection();
+                //pLibrary.ClientWriteData("123ADEW");
+                //pLibrary.ClientReadData();
+               // pLibrary.DisConnection();
+                // MessageBox.Show(pLibrary.LocalIP);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message + ",Rollback:" + pLibrary.LocalIP);
+                MessageBox.Show(ex.Message);
+             //  MessageBox.Show(ex.Message + ",Rollback:" + pLibrary.LocalIP);
             }
           
         }

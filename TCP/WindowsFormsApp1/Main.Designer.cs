@@ -30,11 +30,12 @@
         {
             this.btnTest = new System.Windows.Forms.Button();
             this.txtIP = new System.Windows.Forms.TextBox();
+            this.txtPort = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnTest
             // 
-            this.btnTest.Location = new System.Drawing.Point(1158, 247);
+            this.btnTest.Location = new System.Drawing.Point(1158, 243);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(464, 192);
             this.btnTest.TabIndex = 0;
@@ -44,17 +45,26 @@
             // 
             // txtIP
             // 
-            this.txtIP.Location = new System.Drawing.Point(753, 80);
+            this.txtIP.Location = new System.Drawing.Point(1158, 71);
             this.txtIP.Name = "txtIP";
             this.txtIP.Size = new System.Drawing.Size(317, 33);
             this.txtIP.TabIndex = 1;
             this.txtIP.Text = "127.0.0.1";
+            // 
+            // txtPort
+            // 
+            this.txtPort.Location = new System.Drawing.Point(1158, 121);
+            this.txtPort.Name = "txtPort";
+            this.txtPort.Size = new System.Drawing.Size(317, 33);
+            this.txtPort.TabIndex = 1;
+            this.txtPort.Text = "5000";
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1706, 1129);
+            this.Controls.Add(this.txtPort);
             this.Controls.Add(this.txtIP);
             this.Controls.Add(this.btnTest);
             this.Name = "Main";
@@ -69,6 +79,7 @@
 
         private System.Windows.Forms.Button btnTest;
         private System.Windows.Forms.TextBox txtIP;
+        private System.Windows.Forms.TextBox txtPort;
     }
 }
 
