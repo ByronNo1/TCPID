@@ -5,10 +5,84 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 using static WindowsFormsApp1.SECS;
 
 namespace WindowsFormsApp1
 {
+
+    public static class SecsSessionType
+    {
+        //            Select.req：SType = 1，PType = 0
+        //            Select.rsp：SType = 2，PType = 0，Header Byte 3 为 SelectStatus 项
+        //            Linktest.req：SType = 5，Ptype = 0，Session ID = 0xFFFF
+        //            Linktest.rsp：SType = 6，Ptype = 0，Session ID = 0xFFFF
+        //            Separate.req：SType = 9，PType = 0
+        //            Select.req/Select.rsp
+        //           Not Selected 状态转化为 Selected 状态所使用的消息(Active Entity 发送Select.req)
+        //           Deselect.req/Deselect.rsp
+        //           在双方协议终止通信时使用.由想要通信终止的一端发送Deselect.req.
+        //           Linktest.req/Linktest.rsp
+        //           连接状态的确认和维护确认, 如果没有应答则转换为Not Connected 状态.
+        //           Separate.req
+        //           单方面通知通信终止时使用.
+        //           Reject.req
+        //           收到无效消息时发送
+
+        private const string _SelectRequest = "FFFF00000001";
+        private const string _SelectResponse = "FFFF00000002";
+        private const string _DeselectRequest = "FFFF00000003";
+        private const string _DeselectResponse = "FFFF00000004";
+        private const string _LinktestRequest = "FFFF00000005";
+        private const string _LinktestResponse = "FFFF00000006";
+        private const string _RejectRequest = "FFFF00000007";
+        private const string _SeparateRequest = "FFFF00000009";
+
+        public static string StrTimeByte 
+        {
+            get 
+            {
+                string StrTime = (DateTime.Now.Day).ToString("x2").ToUpper();
+                StrTime += (DateTime.Now.Hour).ToString("x2").ToUpper();
+                StrTime += (DateTime.Now.Minute).ToString("x2").ToUpper();
+                StrTime += (DateTime.Now.Second).ToString("x2").ToUpper();
+                return StrTime;
+            }
+        }
+        public static string SelectRequest 
+        { 
+            get { return _SelectRequest + StrTimeByte; }
+        }
+        public static string SelectResponse 
+        {
+            get { return _SelectResponse + StrTimeByte; }
+        }
+        public static string DeselectRequest
+        {
+            get { return _DeselectRequest + StrTimeByte; }
+        }
+        public static string DeselectResponse
+        {
+            get { return _DeselectResponse + StrTimeByte; }
+        }
+        public static string LinktestRequest
+        {
+            get { return _LinktestRequest + StrTimeByte; }
+        }
+        public static string LinktestResponse
+        {
+            get { return _LinktestResponse + StrTimeByte; }
+        }
+        public static string RejectRequest
+        {
+            get { return _RejectRequest + StrTimeByte; }
+        }
+        public static string SeparateRequest
+        {
+            get { return _SeparateRequest + StrTimeByte; }
+        }
+    }
+
     internal class SECS
     {
         public string strDeviceID = "";
@@ -31,6 +105,24 @@ namespace WindowsFormsApp1
             CHAR_2 = 0x49,
             JIS = 0x45,
         }
+
+        private static int _intSystemByte = 0;
+
+        public static string StrSystemByte
+        {
+            get
+            {
+                _intSystemByte++;
+                if (_intSystemByte > 1073741824)
+                {
+                    _intSystemByte = 1;
+                }
+                string StrTime = _intSystemByte.ToString("x2").ToUpper();
+                StrTime = StrTime.PadLeft(8, '0');
+                return StrTime;
+            }
+        }
+
         public static string ConfigDeviceIDandSxFyString(string _DeviceID, string _SxFy)
         {
             string gStr = "";

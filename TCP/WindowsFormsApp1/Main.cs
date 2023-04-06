@@ -51,7 +51,8 @@ namespace TCPIP
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string strRAW = "";
+            string StrTime = SecsSessionType.SeparateRequest;
+            string strRAW = SECS.StrSystemByte;//  "";
             string strTEMP = "";
 
             //strRAW =  SECS.GetSxFy( "S2F1");
