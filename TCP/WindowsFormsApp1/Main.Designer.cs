@@ -31,11 +31,13 @@
             this.btnTest = new System.Windows.Forms.Button();
             this.txtIP = new System.Windows.Forms.TextBox();
             this.txtPort = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.txtDeviceID = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnTest
             // 
-            this.btnTest.Location = new System.Drawing.Point(1158, 243);
+            this.btnTest.Location = new System.Drawing.Point(1149, 332);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(464, 192);
             this.btnTest.TabIndex = 0;
@@ -59,11 +61,31 @@
             this.txtPort.TabIndex = 1;
             this.txtPort.Text = "5000";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(1217, 581);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(365, 160);
+            this.button1.TabIndex = 2;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // txtDeviceID
+            // 
+            this.txtDeviceID.Location = new System.Drawing.Point(1159, 177);
+            this.txtDeviceID.Name = "txtDeviceID";
+            this.txtDeviceID.Size = new System.Drawing.Size(316, 33);
+            this.txtDeviceID.TabIndex = 3;
+            this.txtDeviceID.Text = "0";
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1706, 1129);
+            this.Controls.Add(this.txtDeviceID);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.txtPort);
             this.Controls.Add(this.txtIP);
             this.Controls.Add(this.btnTest);
@@ -80,6 +102,8 @@
         private System.Windows.Forms.Button btnTest;
         private System.Windows.Forms.TextBox txtIP;
         private System.Windows.Forms.TextBox txtPort;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox txtDeviceID;
     }
 }
 

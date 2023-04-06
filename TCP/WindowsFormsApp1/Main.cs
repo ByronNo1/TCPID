@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsFormsApp1;
 
 namespace TCPIP
 {
@@ -27,14 +28,17 @@ namespace TCPIP
         {
             try
             {
+                string strRAW = "";
                 pLibrary.LocalIP = txtIP.Text;
                 pLibrary.LocalPort = txtPort.Text;
                 pLibrary.ConnectionType = IPLibrary.SocketType.Client;
-                pLibrary.ConnectionType = IPLibrary.SocketType.Server;
+               // pLibrary.ConnectionType = IPLibrary.SocketType.Server;
                 pLibrary.Connection();
-                //pLibrary.ClientWriteData("123ADEW");
-                //pLibrary.ClientReadData();
-               // pLibrary.DisConnection();
+                strRAW = SECS.GetDataLenHead("00018101000000000001");
+                strRAW = strRAW + "00018101000000000001";
+                pLibrary.ClientWriteData(strRAW);
+              //  pLibrary.ClientReadData();
+                pLibrary.DisConnection();
                 // MessageBox.Show(pLibrary.LocalIP);
             }
             catch (Exception ex)
@@ -44,5 +48,39 @@ namespace TCPIP
             }
           
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string strRAW = "";
+            string strTEMP = "";
+
+            //strRAW =  SECS.GetSxFy( "S2F1");
+            //0000000A00018101000000000001
+            //strRAW =  SECS.GetDataLenHead("00018101000000000001");
+            //strRAW = strRAW + "00018101000000000001";
+            //if (strRAW != "")
+            //{
+
+            //}
+           
+           
+            strRAW += SECS.DataItemOut(SECS.DataType.LIST, "",3);
+            strRAW += SECS.DataItemOut(SECS.DataType.ASCII, "");
+            strRAW += SECS.DataItemOut(SECS.DataType.ASCII, "");
+            strRAW += SECS.DataItemOut(SECS.DataType.LIST, "",2);
+            strTEMP = CharClass.StringToAscString("asde");
+            strRAW += SECS.DataItemOut(SECS.DataType.ASCII, strTEMP);
+            strRAW += SECS.DataItemOut(SECS.DataType.LIST, "", 2);
+            strTEMP = CharClass.StringToAscString("11");
+            strRAW += SECS.DataItemOut(SECS.DataType.ASCII, strTEMP);
+            strRAW += SECS.DataItemOut(SECS.DataType.LIST, "", 1);
+            strRAW += SECS.DataItemOut(SECS.DataType.LIST, "", 1);
+            strTEMP = CharClass.StringToAscString("2123123123");
+            strRAW += SECS.DataItemOut(SECS.DataType.ASCII, strTEMP);
+            Console.WriteLine(strRAW);
+        }
+
+
+
     }
 }
