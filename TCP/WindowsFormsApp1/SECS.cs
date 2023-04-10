@@ -1,6 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -38,9 +40,9 @@ namespace WindowsFormsApp1
         private const string _RejectRequest = "FFFF00000007";
         private const string _SeparateRequest = "FFFF00000009";
 
-        public static string StrTimeByte 
+        public static string StrTimeByte
         {
-            get 
+            get
             {
                 string StrTime = (DateTime.Now.Day).ToString("x2").ToUpper();
                 StrTime += (DateTime.Now.Hour).ToString("x2").ToUpper();
@@ -49,11 +51,11 @@ namespace WindowsFormsApp1
                 return StrTime;
             }
         }
-        public static string SelectRequest 
-        { 
+        public static string SelectRequest
+        {
             get { return _SelectRequest + StrTimeByte; }
         }
-        public static string SelectResponse 
+        public static string SelectResponse
         {
             get { return _SelectResponse + StrTimeByte; }
         }
@@ -106,7 +108,7 @@ namespace WindowsFormsApp1
             JIS = 0x45,
         }
 
-        private static int _intSystemByte = 0;
+        private static int _intSystemByte = 32768;
 
         public static string StrSystemByte
         {
@@ -121,6 +123,16 @@ namespace WindowsFormsApp1
                 StrTime = StrTime.PadLeft(8, '0');
                 return StrTime;
             }
+            set
+            {  //如果系統Byte 與 連線的太接近必須修改。避免搞錯
+                CultureInfo provider;
+                provider = new CultureInfo("en-US");
+                if (int.TryParse(value, NumberStyles.HexNumber, provider, out _))
+                {
+                    int.TryParse(value, System.Globalization.NumberStyles.HexNumber, provider, out _intSystemByte); //(str)16進制轉換成int
+                }
+            }
+
         }
 
         public static string ConfigDeviceIDandSxFyString(string _DeviceID, string _SxFy)
@@ -132,7 +144,7 @@ namespace WindowsFormsApp1
             return gStr;
         }
 
-        public static string GetSxFy( string _SxFy)
+        public static string GetSxFy(string _SxFy)
         {
             string TempStr = "";
             try
@@ -150,14 +162,14 @@ namespace WindowsFormsApp1
                         Fy = (Fy.PadLeft(2, '0')).ToUpper();
                         TempStr = Sx + " " + Fy;
                     }
-                   
+
                 }
             }
             catch (Exception)
             {
                 TempStr = "";
             }
-           
+
             return TempStr;
         }
 
@@ -178,8 +190,8 @@ namespace WindowsFormsApp1
             int TempInt = 0;
             try
             {
-                TempInt = _Data.Length /2;
-                if ((_Data.Length - 2* TempInt ) == 0) //相減後不能有餘數
+                TempInt = _Data.Length / 2;
+                if ((_Data.Length - 2 * TempInt) == 0) //相減後不能有餘數
                 {
                     TempStr = Convert.ToString(TempInt, 16);
                     TempStr = TempStr.PadLeft(8, '0').ToUpper();
@@ -198,10 +210,10 @@ namespace WindowsFormsApp1
         /// </summary>
         /// <param name="dataType"></param>
         /// <param name="data"></param>
-        /// <param name="_dataLenI">有輸入依照輸入的個數,在LIST下 data會輸入""，但是後面有幾LIST</param>
-        /// (SECS.DataType.LIST, "",3),(SECS.DataType.ASCII, "323130"),
+        /// <param name="_dataLenI">有輸入依照輸入的個數,在LIST下 data會輸入""，所以後面有幾資料</param>
+        /// DataItemOut(Ascii,"",0)  , DataItemOut(List,"",0) , DataItemOut(List,"",5) 
         /// <returns></returns>
-        public static string DataItemOut(DataType dataType,  string data="", int _dataLenI = 0)
+        public static string DataItemOut(DataType dataType, int _dataLenI, string data)
         {
             string TempStr = "";
             int dataLen;
@@ -210,33 +222,44 @@ namespace WindowsFormsApp1
             string dataStr;
             string TempDataStr;
             string DataStrB;
-            if (_dataLenI == 0) 
+            if (_dataLenI == 0)
             {
-                dataLen = data.Length / 2;
-                if ((data.Length - dataLen * 2) != 0) //有餘數代表輸入資料有問題
+                if ((data.Length - ((int)(data.Length / 2)) * 2) != 0) //有餘數代表輸入資料有問題
                 {
                     return "";
                 }
+                else
+                {
+                    _dataLenI = (int)(data.Length / 2);
+                }
             }
-            else   //如果有輸入依照輸入的個數,例如LIST會輸入""，但是後面有幾LIST
-            {
-                dataLen = _dataLenI;
-            }
+            //如果有輸入依照輸入的個數,例如LIST會輸入""，但是後面有幾LIST
+            dataLen = _dataLenI;
+
             switch (dataType)
             {
                 case DataType.LIST:
                     {
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataLenS = dataLen.ToString("x2").ToUpper().Trim();
-                        TempStr = dataTypeS  + dataLenS;
+                        TempStr = dataTypeS + dataLenS;
                     }
                     break;
                 case DataType.BOOLEAN:
                     {  //有可能有0x
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataLenS = dataLen.ToString().PadLeft(2, '0');
+
+                        if (data != "0" || data.ToUpper() != "F")
+                        {
+                            data = "FF";
+                        }
+                        else
+                        {
+                            data = "00";
+                        }
                         dataStr = Regex.Replace(data.ToString(), "0x", "").PadLeft(2, '0');
-                        TempStr = dataTypeS  + dataLenS  + dataStr;
+                        TempStr = dataTypeS + dataLenS + dataStr;
                     }
                     break;
                 case DataType.BINARY:
@@ -244,7 +267,17 @@ namespace WindowsFormsApp1
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataLenS = dataLen.ToString().PadLeft(2, '0');
                         dataStr = Regex.Replace(data.ToString(), "0x", "").PadLeft(2, '0');
-                        TempStr = dataTypeS  + dataLenS  + dataStr;
+                        TempStr = dataTypeS + dataLenS + dataStr;
+                    }
+                    break;
+                case DataType.JIS:
+                    {
+                        dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
+                        dataLenS = dataLen.ToString("x2").ToUpper().Trim();
+                        dataStr = data.ToString();
+                        dataStr = dataStr.PadLeft(dataLen * 2, '0');  //依照輸入的個數為主補上，因為轉換成HEX 所以要乘2， "A1" => (ASCII)HexString"4131"
+                        dataStr = dataStr.Substring(dataStr.Length - dataLen * 2, dataLen * 2); //避免輸入過多
+                        TempStr = dataTypeS + dataLenS + dataStr;
                     }
                     break;
                 case DataType.ASCII:
@@ -252,7 +285,9 @@ namespace WindowsFormsApp1
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataLenS = dataLen.ToString("x2").ToUpper().Trim();
                         dataStr = data.ToString();
-                        TempStr = dataTypeS  + dataLenS  + dataStr;
+                        dataStr = dataStr.PadLeft(dataLen * 2, '0');  //依照輸入的個數為主補上，因為轉換成HEX 所以要乘2， "A1" => (ASCII)HexString"4131"
+                        dataStr = dataStr.Substring(dataStr.Length - dataLen * 2, dataLen * 2); //避免輸入過多
+                        TempStr = dataTypeS + dataLenS + dataStr;
                     }
                     break;
                 case DataType.INT_1:
@@ -260,9 +295,9 @@ namespace WindowsFormsApp1
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
                         TempDataStr = dataStr.PadLeft(1 * 2 * dataLen, '0');
-                        DataStrB = CharClass.StringAddSpace(TempDataStr);
-                        dataLenS = DataStrB.Split(' ').Length.ToString("x2");
-                        TempStr = dataTypeS  + dataLenS  + DataStrB;
+                        DataStrB = TempDataStr;
+                        dataLenS = (dataLen).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
                     }
                     break;
                 case DataType.INT_2:
@@ -270,9 +305,9 @@ namespace WindowsFormsApp1
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
                         TempDataStr = dataStr.PadLeft(2 * 2 * dataLen, '0');
-                        DataStrB = CharClass.StringAddSpace(TempDataStr);
-                        dataLenS = DataStrB.Split(' ').Length.ToString("x2");
-                        TempStr = dataTypeS  + dataLenS  + DataStrB;
+                        DataStrB = TempDataStr;
+                        dataLenS = (dataLen * 2).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
                     }
                     break;
                 case DataType.INT_4:
@@ -280,19 +315,29 @@ namespace WindowsFormsApp1
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
                         TempDataStr = dataStr.PadLeft(4 * 2 * dataLen, '0');
-                        DataStrB = CharClass.StringAddSpace(TempDataStr);
-                        dataLenS = DataStrB.Split(' ').Length.ToString("x2");
-                        TempStr = dataTypeS  + dataLenS  + DataStrB;
+                        DataStrB = TempDataStr;
+                        dataLenS = (dataLen * 4).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
+                    }
+                    break;
+                case DataType.INT_8:
+                    {
+                        dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
+                        dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
+                        TempDataStr = dataStr.PadLeft(8 * 2 * dataLen, '0');
+                        DataStrB = TempDataStr;
+                        dataLenS = (dataLen * 8).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
                     }
                     break;
                 case DataType.UINT_1:
                     {
-                       dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
-                       dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
-                       TempDataStr = dataStr.PadLeft(1 * 2 * dataLen, '0');
-                        DataStrB = CharClass.StringAddSpace(TempDataStr);
-                       dataLenS = DataStrB.Split(' ').Length.ToString("x2");
-                        TempStr = dataTypeS  + dataLenS  + DataStrB;
+                        dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
+                        dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
+                        TempDataStr = dataStr.PadLeft(1 * 2 * dataLen, '0');
+                        DataStrB = TempDataStr;
+                        dataLenS = (dataLen).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
                     }
                     break;
                 case DataType.UINT_2:
@@ -300,9 +345,9 @@ namespace WindowsFormsApp1
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
                         TempDataStr = dataStr.PadLeft(2 * 2 * dataLen, '0');
-                        DataStrB = CharClass.StringAddSpace(TempDataStr);
-                        dataLenS = DataStrB.Split(' ').Length.ToString("x2");
-                        TempStr = dataTypeS  + dataLenS  + DataStrB;
+                        DataStrB = TempDataStr;
+                        dataLenS = (dataLen * 2).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
                     }
                     break;
                 case DataType.UINT_4:
@@ -310,9 +355,19 @@ namespace WindowsFormsApp1
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
                         dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
                         TempDataStr = dataStr.PadLeft(4 * 2 * dataLen, '0');
-                        DataStrB = CharClass.StringAddSpace(TempDataStr);
-                        dataLenS = DataStrB.Split(' ').Length.ToString("x2");
-                        TempStr = dataTypeS  + dataLenS  + DataStrB;
+                        DataStrB = TempDataStr;
+                        dataLenS = (dataLen * 4).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
+                    }
+                    break;
+                case DataType.UINT_8:
+                    {
+                        dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
+                        dataStr = (Convert.ToInt16(data)).ToString("x2").ToUpper().Trim();
+                        TempDataStr = dataStr.PadLeft(8 * 2 * dataLen, '0');
+                        DataStrB = TempDataStr;
+                        dataLenS = (dataLen * 8).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
                     }
                     break;
                 case DataType.FT_4:
@@ -321,30 +376,32 @@ namespace WindowsFormsApp1
                         float f1 = Convert.ToSingle(data.ToString().Trim());
                         byte[] b1 = BitConverter.GetBytes(f1);
                         dataStr = string.Empty;
-                        foreach (int tmp in b1)
+                        foreach (int tmp in b1.Reverse())
                         {
                             dataStr += tmp.ToString("x2").ToUpper().Trim();
                         }
                         TempDataStr = dataStr.PadLeft(4 * 1 * dataLen, '0');
-                        DataStrB = CharClass.StringAddSpace(TempDataStr);
-                        dataLenS = DataStrB.Split(' ').Length.ToString("x2");
-                        TempStr = dataTypeS  + dataLenS  + DataStrB;
+                        DataStrB = TempDataStr;
+                        dataLenS = (4 * 1 * dataLen).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
                     }
                     break;
                 case DataType.FT_8:
                     {
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
-                        float f1 = Convert.ToSingle(data.ToString().Trim());
+                        double f1 = Convert.ToDouble(data.ToString().Trim());
                         byte[] b1 = BitConverter.GetBytes(f1);
                         dataStr = string.Empty;
-                        foreach (int tmp in b1)
+                        foreach (int tmp in b1.Reverse())
                         {
                             dataStr += tmp.ToString("x2").ToUpper().Trim();
                         }
                         TempDataStr = dataStr.PadLeft(4 * 2 * dataLen, '0');
-                        DataStrB = CharClass.StringAddSpace(TempDataStr);
-                        dataLenS = DataStrB.Split(' ').Length.ToString("x2");
-                        TempStr = dataTypeS  + dataLenS  + DataStrB;
+                        DataStrB = TempDataStr;
+                        dataLenS = (4 * 2 * dataLen).ToString("x2");
+                        TempStr = dataTypeS + dataLenS + DataStrB;
+
+
                     }
                     break;
             }
@@ -354,9 +411,323 @@ namespace WindowsFormsApp1
     }
 
 
+    internal class SECSItem
+    {
+
+
+        public SECSItem(DataType _DataType, int _intItemCount, string _strValue = "", string _strName = "",
+            string _Description = "", List<SECSItem> _ListSecSItems = null)
+        {
+            DataType = _DataType;
+            intItemCount = _intItemCount;
+            strValue = _strValue;
+            strName = _strName;
+            Description = _Description;
+            ListSecSItems = _ListSecSItems;
+            if (_DataType == DataType.LIST)
+            {
+                ListSecSItems = new List<SECSItem>();
+            }
+        }
+
+        //  public int intIndex;
+        public string strName;
+        public string Description;
+        //  public string strLevel;
+        public string strValue;
+        public DataType DataType;
+        public int intItemCount;
+        public List<SECSItem> ListSecSItems;
+        public int intIndexTag;
+    }
+    internal class SecsTransaction
+    {
+        #region ex
+        //S6F11.Add(new SECSItem(SECS.DataType.UINT_2, 1, "22"));
+        //S6F11.Add(new SECSItem(SECS.DataType.UINT_1, 1, "111"));
+        //S6F11.Add(new SECSItem(SECS.DataType.BINARY, 1, "35"));
+        //S6F11.Add(new SECSItem(SECS.DataType.ASCII, 0, ""));
+        //S6F11.Add(new SECSItem(SECS.DataType.INT_8, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.INT_4, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.INT_2, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.INT_1, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.FT_8, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.FT_4, 1, "11"));
+        //S6F11.Add(new SECSItem(SECS.DataType.UINT_8, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.ASCII, 4, "ABCD"));
+        //S6F11.Add(new SECSItem(SECS.DataType.LIST, 0, ""));
+        //S6F11.Add(new SECSItem(SECS.DataType.BINARY, 3, "303030"));
+        //S6F11.Add(new SECSItem(SECS.DataType.BOOLEAN, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.ASCII, 1, "1"));
+        //S6F11.Add(new SECSItem(SECS.DataType.JIS, 3, "111"));
+        //S6F11.Add(new SECSItem(SECS.DataType.INT_8, 1, "1"));
+        #endregion
+        public SecsTransaction(int _intStreams, int _intFunctions, string _strName = "", string _Description = "",
+            int _intItemCount = 0, bool _isReply = false, int _intReplyStreams = 0, int _intReplyFunctions = 0)
+        {
+            strName = _strName;
+            Description = _Description;
+            intStreams = _intStreams;
+            intFunctions = _intFunctions;
+            intItemCount = _intItemCount;
+            isReply = _isReply;
+            intReplyStreams = _intReplyStreams;
+            intReplyFunctions = _intReplyFunctions;
+            ListSecSItems = new List<SECSItem>();
+            tmpListSItemsNolevel = new List<SECSItem>();
+            OLDListSecSItems = new List<SECSItem>();
+        }
+        public string strName;
+        public string Description;
+        public int intStreams;
+        public int intFunctions;
+        public int intItemCount;
+        public readonly DataType DataType = SECS.DataType.LIST;
+        public List<SECSItem> ListSecSItems;
+        private List<SECSItem> OLDListSecSItems;
+        //private List<SECSItem> OLDListSecSItemsA;
+        private List<SECSItem> tmpListSItemsNolevel; //沒有階層單純存資料用
+
+        public bool isReply;
+        public int intReplyStreams;
+        public int intReplyFunctions;
+
+
+        public void Add(SECSItem _SECSItem)
+        {
+            if (OLDListSecSItems != ListSecSItems) //判斷有沒有不一樣有，代表 ListSecSItems被外部修改過 要重讀
+            {
+                ListSecSItemsTotmpListSItemsNolevel();
+            }
+            tmpListSItemsNolevel.Add(_SECSItem);
+            AddLevelSecSItems(ListSecSItems, _SECSItem);
+            //NoleveltoListSecSItems();
+        }
+
+
+
+        private void ListSecSItemsTotmpListSItemsNolevel()
+        {
+
+        }
+
+        private void NoleveltoListSecSItems()
+        {
+            SECSItem tmpSECSItem;
+            ListSecSItems = new List<SECSItem>();
+            for (int i = 0; i < tmpListSItemsNolevel.Count; i++)
+            {
+                tmpSECSItem = tmpListSItemsNolevel[i];
+                AddLevelSecSItems(ListSecSItems, tmpSECSItem);
+            }
+        }
+
+        private void AddLevelSecSItems(List<SECSItem> _ListSecSItems, SECSItem _tmpSECSItem)
+        {
+
+            List<SECSItem> tmpListSecSItemsA = null;
+            List<SECSItem> OLDListSecSItemsA = new List<SECSItem>();
+            getNeedListSecSItems(_ListSecSItems,ref OLDListSecSItemsA);
+
+            for (int i = 0; i < OLDListSecSItemsA.Count; i++)
+            {
+                if (OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].intItemCount > OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].ListSecSItems.Count)
+                {
+                    tmpListSecSItemsA = OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].ListSecSItems;
+                }
+                
+            }
+            if (tmpListSecSItemsA == null )
+            {
+                _ListSecSItems.Add(_tmpSECSItem);
+            }
+            else
+            {
+                tmpListSecSItemsA.Add(_tmpSECSItem);
+            }
+            //int index = _ListSecSItems.Count;
+            //if (index != 0)
+            //{
+            //    if (_ListSecSItems[index - 1].DataType == DataType.LIST &&
+            //        (_ListSecSItems[index - 1].intItemCount != _ListSecSItems[index - 1].ListSecSItems.Count()))
+            //    {
+
+            //        AddLevelSecSItems(ref _ListSecSItems[index - 1].ListSecSItems, _tmpSECSItem);
+            //    }
+            //    else
+            //    {
+            //        _ListSecSItems.Add(_tmpSECSItem);
+            //    }
+
+            //}
+            //else
+            //{
+            //    _ListSecSItems.Add(_tmpSECSItem);
+            //}
+        }
+
+
+        //找到最底層沒有塞滿的LIST 
+        private List<SECSItem> getNeedListSecSItemsBB(List<SECSItem> _ListSecSItems, List<SECSItem> oldListSecSItems = null)
+        {
+            if (_ListSecSItems == null)
+            {
+                return _ListSecSItems;
+            }
+
+            for (int i = 0; i < _ListSecSItems.Count; i++)
+            {
+                if (_ListSecSItems[i].ListSecSItems != null && _ListSecSItems[i].intItemCount > _ListSecSItems[i].ListSecSItems.Count)
+                {
+                    return getNeedListSecSItemsBB(_ListSecSItems[i].ListSecSItems, _ListSecSItems);
+                }
+                else
+                {
+                    if (_ListSecSItems[i].DataType == DataType.LIST)
+                    {
+                        if (_ListSecSItems[i].intItemCount > _ListSecSItems[i].ListSecSItems.Count)
+                        {
+                            return _ListSecSItems[i].ListSecSItems;
+                        }
+                        else
+                        {
+                            // return _ListSecSItems;
+                        }
+                    }
+                    else
+                    {
+                        // return _ListSecSItems;
+                    }
+
+                }
+            }
+            if (oldListSecSItems == null)
+            {
+                return _ListSecSItems;
+            }
+            return oldListSecSItems;
+        }
+
+
+        private List<SECSItem> getNeedListSecSItemsAA(List<SECSItem> _ListSecSItems)
+        {
+            int index = _ListSecSItems.Count;
+            int index2 = 0;
+            if (index == 0)
+            {
+                return _ListSecSItems;
+            }
+            if (_ListSecSItems[index - 1].DataType == DataType.LIST)
+            {
+                if (_ListSecSItems[index - 1].intItemCount > _ListSecSItems[index - 1].ListSecSItems.Count)
+                {
+                    return getNeedListSecSItemsAA(_ListSecSItems[index - 1].ListSecSItems);
+                }
+                else
+                {
+                    index2 = _ListSecSItems[index - 1].ListSecSItems.Count;
+                    if (_ListSecSItems[index - 1].ListSecSItems[index2 - 1].DataType == DataType.LIST)
+                    {
+                        if (_ListSecSItems[index - 1].ListSecSItems[index2 - 1].intItemCount >
+                            _ListSecSItems[index - 1].ListSecSItems[index2 - 1].ListSecSItems.Count)
+                        {
+                            return getNeedListSecSItemsAA(_ListSecSItems[index - 1].ListSecSItems[index2 - 1].ListSecSItems);
+                        }
+                    }
+
+
+
+                    return _ListSecSItems;
+                }
+            }
+
+            return _ListSecSItems;
+        }
+
+
+        private void getNeedListSecSItems(List<SECSItem> _ListSecSItems,ref List<SECSItem> OLDListSecSItemsA, bool isReEntry = false)
+        {
+            int index = _ListSecSItems.Count;
+            if (index == 0 && isReEntry == false)
+            {
+                OLDListSecSItemsA = _ListSecSItems;
+                return ;
+            }
+            for (int i = 0; i < _ListSecSItems.Count; i++)
+            {
+                if (_ListSecSItems[i].DataType == DataType.LIST)
+                {
+                    OLDListSecSItemsA.Add(_ListSecSItems[i]);
+                    getNeedListSecSItems(_ListSecSItems[i].ListSecSItems, ref OLDListSecSItemsA, true);
+                }
+            }
+
+        }
+
+        private List<SECSItem> getNeedSecSItems(SECSItem _SecSItems)
+        {
+            if (_SecSItems.ListSecSItems.Count < _SecSItems.intItemCount )
+            {
+
+            }
+
+            return _SecSItems.ListSecSItems;
+        }
+
+
+        private List<SECSItem> getNeedListSecSItemsCC(List<SECSItem> _ListSecSItems)
+        {
+            int index = _ListSecSItems.Count;
+            int index2 = 0;
+            if (index == 0)
+            {
+                return _ListSecSItems;
+            }
+            if (_ListSecSItems[index - 1].DataType == DataType.LIST)
+            {
+                return getNeedListSecSItemsCC(_ListSecSItems[index - 1].ListSecSItems);
+            }
+            else
+            {
+                return _ListSecSItems;
+            }
+
+            return _ListSecSItems;
+        }
+
+
+
+        public string GetSendString()
+        {
+            ListSecSItemsTotmpListSItemsNolevel();
+            SECSItem tmpSECSItem;
+            string tmpSend = "";
+            string strValue = "";
+            for (int i = 0; i < tmpListSItemsNolevel.Count; i++)
+            {
+                tmpSECSItem = tmpListSItemsNolevel[i];
+
+                if (tmpSECSItem.DataType == DataType.ASCII || tmpSECSItem.DataType == DataType.JIS)
+                {
+                    strValue = CharClass.StringToAscString(tmpSECSItem.strValue);
+                }
+                else
+                {
+                    strValue = tmpSECSItem.strValue;
+                }
+                tmpSend += DataItemOut(tmpSECSItem.DataType, tmpSECSItem.intItemCount, strValue);
+            }
+
+            return tmpSend;
+        }
+
+
+    }
+
     public class CharClass
     {
-       
+
         public static string StringAddSpace(string inputStr)
         {
             string TempStr = "";
@@ -395,12 +766,12 @@ namespace WindowsFormsApp1
                 }
                 return TempStr.ToUpper().Trim();
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
 
                 throw ex;
             }
-          
+
         }
 
     }
