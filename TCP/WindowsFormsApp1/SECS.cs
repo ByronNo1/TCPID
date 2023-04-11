@@ -413,6 +413,15 @@ namespace WindowsFormsApp1
 
     internal class SECSItem
     {
+        //  public int intIndex;
+        public string strName;
+        public string Description;
+        //  public string strLevel;
+        public string strValue;
+        public DataType DataType;
+        public int intItemCount;
+        public List<SECSItem> ListSecSItems;
+        //public int intIndexTag;
 
 
         public SECSItem(DataType _DataType, int _intItemCount, string _strValue = "", string _strName = "",
@@ -430,15 +439,27 @@ namespace WindowsFormsApp1
             }
         }
 
-        //  public int intIndex;
-        public string strName;
-        public string Description;
-        //  public string strLevel;
-        public string strValue;
-        public DataType DataType;
-        public int intItemCount;
-        public List<SECSItem> ListSecSItems;
-        public int intIndexTag;
+        public SECSItem(SECSItem sECSItem)
+        {
+            DataType = sECSItem.DataType;
+            intItemCount = sECSItem.intItemCount;
+            strValue = sECSItem.strValue;
+            strName = sECSItem.strName;
+            Description = sECSItem.Description;
+            ListSecSItems = sECSItem.ListSecSItems;
+            if (sECSItem.DataType == DataType.LIST)
+            {
+                ListSecSItems = new List<SECSItem>();
+            }
+        }
+
+        public object Clone()
+        {
+            //建立物件的淺層複製
+            return this.MemberwiseClone();
+        }
+
+
     }
     internal class SecsTransaction
     {
@@ -477,6 +498,8 @@ namespace WindowsFormsApp1
             ListSecSItems = new List<SECSItem>();
             tmpListSItemsNolevel = new List<SECSItem>();
             OLDListSecSItems = new List<SECSItem>();
+            transactionB = new List<SECSItem>();
+            onListSecSItemsB = new List<SECSItem>();
         }
         public string strName;
         public string Description;
@@ -486,8 +509,10 @@ namespace WindowsFormsApp1
         public readonly DataType DataType = SECS.DataType.LIST;
         public List<SECSItem> ListSecSItems;
         private List<SECSItem> OLDListSecSItems;
-        //private List<SECSItem> OLDListSecSItemsA;
         private List<SECSItem> tmpListSItemsNolevel; //沒有階層單純存資料用
+
+        public List<SECSItem> transactionB;
+        private List<SECSItem> onListSecSItemsB;
 
         public bool isReply;
         public int intReplyStreams;
@@ -503,9 +528,11 @@ namespace WindowsFormsApp1
             tmpListSItemsNolevel.Add(_SECSItem);
             AddLevelSecSItems(ListSecSItems, _SECSItem);
             //NoleveltoListSecSItems();
+
+           // AddB(new SECSItem(_SECSItem));
         }
 
-
+       
 
         private void ListSecSItemsTotmpListSItemsNolevel()
         {
@@ -530,122 +557,26 @@ namespace WindowsFormsApp1
             List<SECSItem> OLDListSecSItemsA = new List<SECSItem>();
             getNeedListSecSItems(_ListSecSItems,ref OLDListSecSItemsA);
 
-            for (int i = 0; i < OLDListSecSItemsA.Count; i++)
-            {
+            for (int i = 0; i < OLDListSecSItemsA.Count; i++) 
+            {//從最新的往前找。
                 if (OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].intItemCount > OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].ListSecSItems.Count)
                 {
                     tmpListSecSItemsA = OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].ListSecSItems;
                 }
                 
             }
-            if (tmpListSecSItemsA == null )
+            if (tmpListSecSItemsA == null )  // 代表第一次 找
             {
                 _ListSecSItems.Add(_tmpSECSItem);
             }
             else
             {
-                tmpListSecSItemsA.Add(_tmpSECSItem);
+                tmpListSecSItemsA.Add(new SECSItem (_tmpSECSItem));
             }
-            //int index = _ListSecSItems.Count;
-            //if (index != 0)
-            //{
-            //    if (_ListSecSItems[index - 1].DataType == DataType.LIST &&
-            //        (_ListSecSItems[index - 1].intItemCount != _ListSecSItems[index - 1].ListSecSItems.Count()))
-            //    {
-
-            //        AddLevelSecSItems(ref _ListSecSItems[index - 1].ListSecSItems, _tmpSECSItem);
-            //    }
-            //    else
-            //    {
-            //        _ListSecSItems.Add(_tmpSECSItem);
-            //    }
-
-            //}
-            //else
-            //{
-            //    _ListSecSItems.Add(_tmpSECSItem);
-            //}
         }
 
 
-        //找到最底層沒有塞滿的LIST 
-        private List<SECSItem> getNeedListSecSItemsBB(List<SECSItem> _ListSecSItems, List<SECSItem> oldListSecSItems = null)
-        {
-            if (_ListSecSItems == null)
-            {
-                return _ListSecSItems;
-            }
-
-            for (int i = 0; i < _ListSecSItems.Count; i++)
-            {
-                if (_ListSecSItems[i].ListSecSItems != null && _ListSecSItems[i].intItemCount > _ListSecSItems[i].ListSecSItems.Count)
-                {
-                    return getNeedListSecSItemsBB(_ListSecSItems[i].ListSecSItems, _ListSecSItems);
-                }
-                else
-                {
-                    if (_ListSecSItems[i].DataType == DataType.LIST)
-                    {
-                        if (_ListSecSItems[i].intItemCount > _ListSecSItems[i].ListSecSItems.Count)
-                        {
-                            return _ListSecSItems[i].ListSecSItems;
-                        }
-                        else
-                        {
-                            // return _ListSecSItems;
-                        }
-                    }
-                    else
-                    {
-                        // return _ListSecSItems;
-                    }
-
-                }
-            }
-            if (oldListSecSItems == null)
-            {
-                return _ListSecSItems;
-            }
-            return oldListSecSItems;
-        }
-
-
-        private List<SECSItem> getNeedListSecSItemsAA(List<SECSItem> _ListSecSItems)
-        {
-            int index = _ListSecSItems.Count;
-            int index2 = 0;
-            if (index == 0)
-            {
-                return _ListSecSItems;
-            }
-            if (_ListSecSItems[index - 1].DataType == DataType.LIST)
-            {
-                if (_ListSecSItems[index - 1].intItemCount > _ListSecSItems[index - 1].ListSecSItems.Count)
-                {
-                    return getNeedListSecSItemsAA(_ListSecSItems[index - 1].ListSecSItems);
-                }
-                else
-                {
-                    index2 = _ListSecSItems[index - 1].ListSecSItems.Count;
-                    if (_ListSecSItems[index - 1].ListSecSItems[index2 - 1].DataType == DataType.LIST)
-                    {
-                        if (_ListSecSItems[index - 1].ListSecSItems[index2 - 1].intItemCount >
-                            _ListSecSItems[index - 1].ListSecSItems[index2 - 1].ListSecSItems.Count)
-                        {
-                            return getNeedListSecSItemsAA(_ListSecSItems[index - 1].ListSecSItems[index2 - 1].ListSecSItems);
-                        }
-                    }
-
-
-
-                    return _ListSecSItems;
-                }
-            }
-
-            return _ListSecSItems;
-        }
-
-
+        //找到所有的LIST 
         private void getNeedListSecSItems(List<SECSItem> _ListSecSItems,ref List<SECSItem> OLDListSecSItemsA, bool isReEntry = false)
         {
             int index = _ListSecSItems.Count;
@@ -662,38 +593,6 @@ namespace WindowsFormsApp1
                     getNeedListSecSItems(_ListSecSItems[i].ListSecSItems, ref OLDListSecSItemsA, true);
                 }
             }
-
-        }
-
-        private List<SECSItem> getNeedSecSItems(SECSItem _SecSItems)
-        {
-            if (_SecSItems.ListSecSItems.Count < _SecSItems.intItemCount )
-            {
-
-            }
-
-            return _SecSItems.ListSecSItems;
-        }
-
-
-        private List<SECSItem> getNeedListSecSItemsCC(List<SECSItem> _ListSecSItems)
-        {
-            int index = _ListSecSItems.Count;
-            int index2 = 0;
-            if (index == 0)
-            {
-                return _ListSecSItems;
-            }
-            if (_ListSecSItems[index - 1].DataType == DataType.LIST)
-            {
-                return getNeedListSecSItemsCC(_ListSecSItems[index - 1].ListSecSItems);
-            }
-            else
-            {
-                return _ListSecSItems;
-            }
-
-            return _ListSecSItems;
         }
 
 

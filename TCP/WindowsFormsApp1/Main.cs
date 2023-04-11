@@ -57,16 +57,16 @@ namespace TCPIP
 
             //SECSItem A1 = new SECSItem(SECS.DataType.ASCII, 2, "A1");
             S6F11.Add(new SECSItem(SECS.DataType.LIST, 1, ""));
-            S6F11.Add(new SECSItem(SECS.DataType.LIST, 3, ""));
-                S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "0"));
-                S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "1004"));
-                S6F11.Add(new SECSItem(SECS.DataType.LIST, 1, ""));
-                    S6F11.Add(new SECSItem(SECS.DataType.LIST, 2, ""));
-                        S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "8"));
-                        S6F11.Add(new SECSItem(SECS.DataType.LIST, 3, ""));
-                            S6F11.Add(new SECSItem(SECS.DataType.UINT_1, 1, "0"));
-                            S6F11.Add(new SECSItem(SECS.DataType.ASCII, 12, "AAAAAAAAAAAA"));
-                            S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "0"));
+                S6F11.Add(new SECSItem(SECS.DataType.LIST, 3, ""));
+                    S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "0"));
+                    S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "1004"));
+                    S6F11.Add(new SECSItem(SECS.DataType.LIST, 1, ""));
+                        S6F11.Add(new SECSItem(SECS.DataType.LIST, 2, ""));
+                            S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "8"));
+                            S6F11.Add(new SECSItem(SECS.DataType.LIST, 3, ""));
+                                S6F11.Add(new SECSItem(SECS.DataType.UINT_1, 1, "0"));
+                                S6F11.Add(new SECSItem(SECS.DataType.ASCII, 12, "AAAAAAAAAAAA"));
+                                S6F11.Add(new SECSItem(SECS.DataType.UINT_4, 1, "0"));
             S6F11.Add(new SECSItem(SECS.DataType.ASCII, 4, "END1"));
 
 
