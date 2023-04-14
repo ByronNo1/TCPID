@@ -15,6 +15,7 @@ namespace TCPIP
 {
     internal class IPLibrary
     {
+       
         public string DeviceID = "0";
 
         private IPAddress mLocalIP = IPAddress.Parse("127.0.0.1");
@@ -42,15 +43,15 @@ namespace TCPIP
                     else
                     {
                         mLocalIP = IPAddress.Parse("127.0.0.1");  //跳回預設
-                        throw new Exception("IP error," + value); //警告
-                                                                  //  throw new ArgumentNullException("IP error," + value);
+                        throw new Exception("Local IP error," + value); //警告
+                                                                        //  throw new ArgumentNullException("IP error," + value);
                     }
                 }
                 else
                 {
                     mLocalIP = IPAddress.Parse("127.0.0.1");          //跳回預設
-                    throw new Exception("IPAddress error," + value);  //警告
-                                                                      // throw new ArgumentNullException( "IP error," + value);
+                    throw new Exception("Local IPAddress error," + value);  //警告
+                                                                            // throw new ArgumentNullException( "IP error," + value);
                 }
             }
         }
@@ -77,6 +78,69 @@ namespace TCPIP
 
         }
 
+        private IPAddress mRemoteIP = IPAddress.Parse("127.0.0.1");
+        public string RemoteIP
+        {
+            get
+            {
+                return mRemoteIP.ToString();
+            }
+            set
+            {
+                if (IPAddress.TryParse(value, out mRemoteIP)) //判斷能不能轉換成IP
+                {
+                    string[] AA = value.Split('.');
+                    int[] IpInt = new int[AA.Length];
+
+                    //判斷轉成IP 是否都是正確避免輸入 "1.1.1" 只有三碼也會過
+                    if (AA.Length != 3 && int.TryParse(AA[0], out IpInt[0])
+                       && int.TryParse(AA[1], out IpInt[1]) && int.TryParse(AA[2], out IpInt[2])
+                       && int.TryParse(AA[3], out IpInt[3])
+                       && IpInt[0] < 256 && IpInt[1] < 256 && IpInt[2] < 256 && IpInt[3] < 256)
+                    {
+                        mRemoteIP = IPAddress.Parse(value);
+                    }
+                    else
+                    {
+                        mRemoteIP = IPAddress.Parse("127.0.0.1");  //跳回預設
+                        throw new Exception("Remote IP error," + value); //警告
+                                                                         //  throw new ArgumentNullException("IP error," + value);
+                    }
+                }
+                else
+                {
+                    mRemoteIP = IPAddress.Parse("127.0.0.1");          //跳回預設
+                    throw new Exception("Remote IPAddress error," + value);  //警告
+                                                                             // throw new ArgumentNullException( "IP error," + value);
+                }
+            }
+        }
+
+        private int mRemotePort = 5000;
+        public string RemotePort
+        {
+            get
+            {
+                return mRemotePort.ToString();
+            }
+            set
+            {
+                if (int.TryParse(value, out mRemotePort)) //判斷能不能轉換成IP
+                {
+                }
+                else
+                {
+                    mRemotePort = 5000;         //跳回預設
+                    throw new Exception("Remote Port error," + value);  //警告
+                    // throw new ArgumentNullException( "IP error," + value);
+                }
+            }
+
+        }
+
+        public string StrReceiveMsg;
+        public string StrSendMsg;
+
         public SocketType ConnectionType = SocketType.Client;
         public enum SocketType
         {
@@ -84,6 +148,10 @@ namespace TCPIP
             Server
         }
 
+        private EventHandler IPLibraryConnectOk;
+        private EventHandler IPLibraryDisConnect;
+        private EventHandler IPLibraryReceiveMsg;
+        private EventHandler IPLibrarySendMsg;
 
 
         /// <summary>
@@ -93,8 +161,7 @@ namespace TCPIP
         NetworkStream myNetworkStream = null;
         //宣告 Tcp 用戶端物件
         TcpClient myTcpClient = null;
-        List<TcpClient> ListServerClient = new List<TcpClient>();  //紀錄SERVER 的連線端
-
+       
 
 
         /// <summary>
@@ -103,18 +170,79 @@ namespace TCPIP
         /// <returns></returns>
         TcpListener m_server;
         Thread m_thrListening; // 持續監聽是否有Client連線及收值的執行緒
+        List<TcpClient> ListServerClient = new List<TcpClient>();  //紀錄SERVER 的連線端
+
+        public IPLibrary()
+        {
+
+        }
+
+
+        public event EventHandler ConnectOK
+        {
+            add
+            {
+                IPLibraryConnectOk += value;
+            }
+            remove
+            {
+                IPLibraryConnectOk -= value;
+            }
+        }
+        public event EventHandler DisConnect
+        {
+            add
+            {
+                IPLibraryDisConnect += value;
+            }
+            remove
+            {
+                IPLibraryDisConnect -= value;
+            }
+        }
+        public event EventHandler ReceiveMsg
+        {
+            add
+            {
+                IPLibraryReceiveMsg += value;
+            }
+            remove
+            {
+                IPLibraryReceiveMsg -= value;
+            }
+        }
+        public event EventHandler SendMsg
+        {
+            add
+            {
+                IPLibrarySendMsg += value;
+            }
+            remove
+            {
+                IPLibrarySendMsg -= value;
+            }
+        }
 
 
         public int Connection()
         {
-            if (ConnectionType == SocketType.Server)
+            try
             {
-                return ServerHost(mLocalIP, mLocalPort);
+                if (ConnectionType == SocketType.Server)
+                {
+                    return ServerHost(mLocalIP, mLocalPort);
+                }
+                else if (ConnectionType == SocketType.Client)
+                {
+                    return Client(mRemoteIP, mRemotePort);
+                }
             }
-            else if (ConnectionType == SocketType.Client)
+            catch (Exception)
             {
-                return Client(mLocalIP, mLocalPort);
+
+                return -1;
             }
+
 
             return 0;
         }
@@ -130,6 +258,11 @@ namespace TCPIP
                 m_server.Start();
                 m_thrListening = new Thread(Listening);
                 m_thrListening.Start();
+                if (IPLibraryConnectOk != null)
+                {
+                    IPLibraryConnectOk(this, null);
+                }
+
             }
             catch (SocketException ex)
             {
@@ -153,7 +286,7 @@ namespace TCPIP
                     ListServerClient.Add(client);
 
                     Task tt = new Task(new Action(() =>
-                        { 
+                        {
                             ListeningGetData(client);
                             Console.WriteLine("Close:" + client.Client.RemoteEndPoint.ToString());
                             client.Close();
@@ -180,15 +313,21 @@ namespace TCPIP
                 string sData = "";
                 NetworkStream stream = client.GetStream();
                 sData = "";
-                int i;
+                int intGetL;
                 do // 當有資料傳入時將資料顯示至介面上
                 {
 
-                    if (stream.DataAvailable && (i = stream.Read(btDatas, 0, btDatas.Length)) != 0)
+                    if (stream.DataAvailable && (intGetL = stream.Read(btDatas, 0, btDatas.Length)) != 0)
                     {
-                        sData = System.Text.Encoding.ASCII.GetString(btDatas, 0, i);
+                        // sData = System.Text.Encoding.ASCII.GetString(btDatas, 0, i);
+                        sData = CharClass.byteTobyteString(btDatas, intGetL);
                         //     UdpateMessage("Received Data:" + sData);
                         Console.WriteLine("Received Data:" + sData);
+                        if (IPLibraryReceiveMsg != null)
+                        {
+                            IPLibraryReceiveMsg(this, null);
+                        }
+                        
                     }
                     //測試是否連線
                     if (client.Connected && client.Client.Poll(0, SelectMode.SelectRead))
@@ -205,185 +344,241 @@ namespace TCPIP
             }
         }
 
-
-
-
         private int Client(IPAddress _LocalIP, int _LocalPort)
         {
-            IPEndPoint ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4998); //設定本機 PORT
+            IPEndPoint ipep = new IPEndPoint(mLocalIP, mLocalPort); //設定本機 PORT
             myTcpClient = new TcpClient(ipep);
             try
             {
                 //測試連線至遠端主機
                 myTcpClient.Connect(_LocalIP, _LocalPort);
                 Console.WriteLine("連線成功 !!\n");
-                ////建立網路資料流
-                //myNetworkStream = myTcpClient.GetStream();
+                //建立網路資料流
+                myNetworkStream = myTcpClient.GetStream();
+                m_thrListening = new Thread(ClientReadData);
+                m_thrListening.Start();
+                if (IPLibraryConnectOk != null)
+                {
+                    IPLibraryConnectOk(this, null);
+                }
                 return 0;
             }
             catch
             {
                 Console.WriteLine("主機 {0} 通訊埠 {1} 無法連接  !!", _LocalIP.ToString(), _LocalPort.ToString());
+                DisConnection();
                 return -1;
             }
         }
         //寫入資料
-        public void ClientWriteData(string _strTest)
+
+        public void Send(string StrSend)
         {
-            if (myTcpClient.Connected && _strTest != "")
+            StrSendMsg = StrSend;
+            if (ConnectionType == SocketType.Server)
             {
-                String strTest = "this is a test string !!";
-                strTest = _strTest;
+
+            }
+            else
+            {
+                ClientWriteData(StrSend);
+            }
+            
+        }
+
+
+        private void SendTEst()
+        {
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000180000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000280000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000380000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000480000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000580000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000680000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000980000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000100000000");  //client T7 time out
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000200000000");  //Server T7 time out
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000180000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000280000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000380000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000480000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000580000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000680000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000980000019");
+            ////timeOut :
+            //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+            while (true)
+            {
+                Thread.Sleep(10);
+                if (myNetworkStream.DataAvailable)
+                {
+                    byte[] data = new byte[myTcpClient.ReceiveBufferSize];
+                    int length = myNetworkStream.Read(data, 0, data.Length);
+                    string receiveMsg = "";//= Encoding.UTF8.GetString(data, 0, length);
+                    for (int i = 0; i < length; i++)
+                    {
+                        receiveMsg += data[i].ToString("x2").ToUpper();
+                    }
+
+                    Console.WriteLine("\n接收服务端发来的数据: " + receiveMsg);
+
+                 
+                    Thread.Sleep(100);
+                    //  break;
+                }
+            }
+
+
+        }
+
+        private void ClientWriteData(string _HexStrSend)
+        {
+            if (myTcpClient != null && myTcpClient.Connected && _HexStrSend != "")
+            {
                 //將字串轉 byte 陣列，使用 ASCII 編碼
                 //Byte[] myBytes = Encoding.ASCII.GetBytes(strTest);
-                byte[] myBytes =CharClass.ConvertHexStrToByteArray(strTest);
-                Console.WriteLine("建立網路資料流 !!");
-                //建立網路資料流
-                myNetworkStream = myTcpClient.GetStream();
-                byte[] TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000501812CD3");
-                //timeOut :
-              //  myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000680000019");
-             //   myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
+                byte[] myBytes = CharClass.ConvertHexStrToByteArray(_HexStrSend);
 
-                Console.WriteLine("將字串寫入資料流　!!");
+                Console.WriteLine("將字串寫入資料流　!!" + _HexStrSend);
                 //將字串寫入資料流
-                //  myNetworkStream.Write(myBytes, 0, myBytes.Length);
-                
-                TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000100000000");  //client T7 time out
-                myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000200000000");  //Server T7 time out
-                myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-
-                //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000180000019");
-                ////timeOut :
-                //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000280000019");
-                ////timeOut :
-                //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000380000019");
-                ////timeOut :
-                //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000480000019");
-                ////timeOut :
-                //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000580000019");
-                ////timeOut :
-                //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000680000019");
-                ////timeOut :
-                //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000980000019");
-                ////timeOut :
-                //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-
-
-                while (true)
+                myNetworkStream.Write(myBytes, 0, myBytes.Length);
+                if (IPLibrarySendMsg != null)
                 {
-                    Thread.Sleep(10);
-                    if (myNetworkStream.DataAvailable)
-                    {
-                        byte[] data = new byte[myTcpClient.ReceiveBufferSize];
-                        int length = myNetworkStream.Read(data, 0, data.Length);
-                        string receiveMsg = "";//= Encoding.UTF8.GetString(data, 0, length);
-                        for (int i = 0; i < length; i++)
-                        {
-                            receiveMsg += data[i].ToString("x2").ToUpper();
-                        }
-
-                        Console.WriteLine("\n接收服务端发来的数据: " + receiveMsg);
-                        //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000180000019");
-                        ////timeOut :
-                        //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                        //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000280000019");
-                        ////timeOut :
-                        //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                        //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000380000019");
-                        ////timeOut :
-                        //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                        //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000480000019");
-                        ////timeOut :
-                        //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                        //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000580000019");
-                        ////timeOut :
-                        //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                        //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000680000019");
-                        ////timeOut :
-                        //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-                        //TimeBytes = CharClass.ConvertHexStrToByteArray("0000000AFFFF0000000980000019");
-                        ////timeOut :
-                        //myNetworkStream.Write(TimeBytes, 0, TimeBytes.Length);
-
-                        Thread.Sleep(100);
-                      //  break;
-                    }
+                    IPLibrarySendMsg(this, null);
                 }
 
             }
 
         }
-
-
-
 
         //讀取資料
         public void ClientReadData()
         {
-            if (myTcpClient.Connected)
+            try
             {
-                //Console.WriteLine("從網路資料流讀取資料 !!");
-                ////從網路資料流讀取資料
-                //int bufferSize = myTcpClient.ReceiveBufferSize;
-                //byte[] myBufferBytes = new byte[bufferSize];
-                //myNetworkStream.Read(myBufferBytes, 0, bufferSize);
-                ////取得資料並且解碼文字
-                //Console.WriteLine(Encoding.ASCII.GetString(myBufferBytes, 0, bufferSize));
-                
-                //建立網路資料流
-                myNetworkStream = myTcpClient.GetStream();
-
-                while (true)
+                if (myTcpClient.Connected)
                 {
-                    if (myNetworkStream.DataAvailable)
+                    
+
+                    while (true)
                     {
-                        byte[] data = new byte[myTcpClient.ReceiveBufferSize];
-                        int length = myNetworkStream.Read(data, 0, data.Length);
-                        string receiveMsg = "";//= Encoding.UTF8.GetString(data, 0, length);
-                        for (int i = 0; i < length; i++)
+                        Thread.Sleep(5);
+                        if (myTcpClient.Connected && myNetworkStream.DataAvailable)
                         {
-                            receiveMsg += data[i].ToString("x2").ToUpper();
+                            byte[] data = new byte[myTcpClient.ReceiveBufferSize];
+                            int length = myNetworkStream.Read(data, 0, data.Length);
+                            string receiveMsg = "";//= Encoding.UTF8.GetString(data, 0, length);
+                            for (int i = 0; i < length; i++)
+                            {
+                                receiveMsg += data[i].ToString("x2").ToUpper();
+                            }
+                            StrReceiveMsg = receiveMsg;
+                            Console.WriteLine("收到SERVER的資訊: " + receiveMsg);
+                            if (IPLibraryReceiveMsg != null)
+                            {
+                                IPLibraryReceiveMsg(this, null);
+                            }
                         }
-
-                        Console.WriteLine("\n接收服务端发来的数据: " + receiveMsg);
-                        break;
                     }
-                }
 
+                }
             }
+            catch (Exception)
+            {
+                DisConnection();
+            }
+            
         }
         public void DisConnection()
         {
-            if (ConnectionType == SocketType.Server)
+            if (IPLibraryDisConnect != null)
             {
-                if (m_thrListening.IsAlive)
+                IPLibraryDisConnect(this, null);
+            }
+            
+            try
+            {
+                Thread.Sleep(20);
+                if (m_thrListening != null && m_thrListening.IsAlive)
                 {
                     m_thrListening.Abort();
-                    m_thrListening = null;
-                    Thread.Sleep(50);
+                    Thread.Sleep(20);
                 }
-                m_server.Stop();
-                m_server = null;
+                m_thrListening = null;
             }
-            if (myTcpClient != null) //判斷是否物件
+            catch (Exception)
             {
-                myTcpClient.Close();
+
+            }
+
+            if (ConnectionType == SocketType.Server)
+            {
+                try
+                {
+                    if (m_server != null)
+                    {
+                        m_server.Stop();
+                    }
+                    m_server = null;
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+
+            try
+            {
+                if (myTcpClient != null) //判斷是否物件
+                {
+                    myTcpClient.Close();
+                }
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
                 if (myNetworkStream != null)
                 {
                     myNetworkStream.Close();
                     myNetworkStream.Dispose();
                 }
-                myTcpClient = null;
             }
+            catch (Exception)
+            {
+            }
+            myTcpClient = null;
 
 
         }

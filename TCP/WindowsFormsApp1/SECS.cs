@@ -40,17 +40,7 @@ namespace WindowsFormsApp1
         private const string _RejectRequest = "FFFF00000007";
         private const string _SeparateRequest = "FFFF00000009";
 
-        public static string StrTimeByte
-        {
-            get
-            {
-                string StrTime = (DateTime.Now.Day).ToString("x2").ToUpper();
-                StrTime += (DateTime.Now.Hour).ToString("x2").ToUpper();
-                StrTime += (DateTime.Now.Minute).ToString("x2").ToUpper();
-                StrTime += (DateTime.Now.Second).ToString("x2").ToUpper();
-                return StrTime;
-            }
-        }
+
         public static string SelectRequest
         {
             get { return _SelectRequest + StrTimeByte; }
@@ -87,7 +77,7 @@ namespace WindowsFormsApp1
 
     internal class SECS
     {
-        public string strDeviceID = "";
+        public static string strDeviceID = "";
         public enum DataType
         {
             LIST = 0x1,
@@ -135,14 +125,19 @@ namespace WindowsFormsApp1
 
         }
 
-        public static string ConfigDeviceIDandSxFyString(string _DeviceID, string _SxFy)
+        public static string StrTimeByte
         {
-            string gStr = "";
-            string dev = GetDeviceID(ref gStr, _DeviceID);
-            string sf = gStr + GetSxFy(_SxFy.ToUpper().Trim());
-            gStr = dev + " " + sf + " 00 00 00 00 00 01";
-            return gStr;
+            get
+            {
+                string StrTime = (DateTime.Now.Day).ToString("x2").ToUpper();
+                StrTime += (DateTime.Now.Hour).ToString("x2").ToUpper();
+                StrTime += (DateTime.Now.Minute).ToString("x2").ToUpper();
+                StrTime += (DateTime.Now.Second).ToString("x2").ToUpper();
+                return StrTime;
+            }
         }
+
+
 
         public static string GetSxFy(string _SxFy)
         {
@@ -174,14 +169,14 @@ namespace WindowsFormsApp1
         }
 
 
-        private static string GetDeviceID(ref string rawData, string deviceID)
-        {
-            string HexStr = Convert.ToString(int.Parse(deviceID), 16).ToUpper().Trim();
-            string HexStr1 = HexStr.PadLeft(4, '0');
-            string HexStr2 = CharClass.StringAddSpace(HexStr1);
-            rawData += HexStr2;
-            return HexStr2;
-        }
+        //private static string GetDeviceID(ref string rawData, string deviceID)
+        //{
+        //    string HexStr = Convert.ToString(int.Parse(deviceID), 16).ToUpper().Trim();
+        //    string HexStr1 = HexStr.PadLeft(4, '0');
+        //    string HexStr2 = CharClass.StringAddSpace(HexStr1);
+        //    rawData += HexStr2;
+        //    return HexStr2;
+        //}
 
 
         public static string GetDataLenHead(string _Data)
@@ -485,7 +480,7 @@ namespace WindowsFormsApp1
         //S6F11.Add(new SECSItem(SECS.DataType.INT_8, 1, "1"));
         #endregion
         public SecsTransaction(int _intStreams, int _intFunctions, string _strName = "", string _Description = "",
-            int _intItemCount = 0, bool _isReply = false, int _intReplyStreams = 0, int _intReplyFunctions = 0)
+            int _intItemCount = 0, bool _isReply = true, int _intReplyStreams = 0, int _intReplyFunctions = 0)
         {
             strName = _strName;
             Description = _Description;
@@ -498,25 +493,22 @@ namespace WindowsFormsApp1
             ListSecSItems = new List<SECSItem>();
             tmpListSItemsNolevel = new List<SECSItem>();
             OLDListSecSItems = new List<SECSItem>();
-            transactionB = new List<SECSItem>();
-            onListSecSItemsB = new List<SECSItem>();
+
         }
-        public string strName;
-        public string Description;
-        public int intStreams;
-        public int intFunctions;
-        public int intItemCount;
+        public static string strName;
+        public static string Description;
+        public static int intStreams;
+        public static int intFunctions;
+        public static int intItemCount;
         public readonly DataType DataType = SECS.DataType.LIST;
         public List<SECSItem> ListSecSItems;
         private List<SECSItem> OLDListSecSItems;
         private List<SECSItem> tmpListSItemsNolevel; //沒有階層單純存資料用
 
-        public List<SECSItem> transactionB;
-        private List<SECSItem> onListSecSItemsB;
 
-        public bool isReply;
-        public int intReplyStreams;
-        public int intReplyFunctions;
+        public static bool isReply = true;
+        public static int intReplyStreams;
+        public static int intReplyFunctions;
 
 
         public void Add(SECSItem _SECSItem)
@@ -617,12 +609,43 @@ namespace WindowsFormsApp1
                 }
                 tmpSend += DataItemOut(tmpSECSItem.DataType, tmpSECSItem.intItemCount, strValue);
             }
-
+            tmpSend = ConfigDeviceSxFyString() + tmpSend;
             return tmpSend;
+        }
+
+        public static string ConfigDeviceSxFyString()
+        {
+            string gStr = string.Empty;
+            string dev = GetDeviceID(SECS.strDeviceID);
+            string sf ;
+            sf = (intStreams.ToString("X2").ToUpper()).Substring(1,1) + (intFunctions.ToString("X2").PadLeft(2,'0')).ToUpper();
+            if (isReply)
+            {
+                sf = "8" + sf;
+            }
+            else
+            {
+                sf = "0" + sf;
+            }
+            gStr = dev  + sf + "000000000001";
+            return gStr;
+        }
+
+        private static string GetDeviceID( string deviceID)
+        {
+            if (deviceID == "")
+            {
+                deviceID = "0";
+            }
+            string HexStr = Convert.ToString(int.Parse(deviceID), 16).ToUpper().Trim();
+            string HexStr1 = HexStr.PadLeft(4, '0');
+            return HexStr1;
         }
 
 
     }
+
+
 
     public class CharClass
     {
@@ -672,6 +695,30 @@ namespace WindowsFormsApp1
             }
 
         }
+
+        public static string byteTobyteString(byte[] _bytes,int _GetLLength = -1)
+        {
+            string _StrResult = "";
+            try
+            {
+                if (_GetLLength < 0)
+                {
+                    _GetLLength = _bytes.Length;
+                }
+                for (int i = 0; i < _bytes.Length && i < _GetLLength; i++)
+                {
+                    _StrResult += (_bytes[i].ToString("X2")).ToUpper();
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+            
+
+            return _StrResult;
+        }
+
 
     }
 
