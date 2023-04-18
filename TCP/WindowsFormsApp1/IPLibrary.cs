@@ -15,7 +15,7 @@ namespace TCPIP
 {
     internal class IPLibrary
     {
-       
+
         public string DeviceID = "0";
 
         private IPAddress mLocalIP = IPAddress.Parse("127.0.0.1");
@@ -161,7 +161,7 @@ namespace TCPIP
         NetworkStream myNetworkStream = null;
         //宣告 Tcp 用戶端物件
         TcpClient myTcpClient = null;
-       
+
 
 
         /// <summary>
@@ -171,6 +171,7 @@ namespace TCPIP
         TcpListener m_server;
         Thread m_thrListening; // 持續監聽是否有Client連線及收值的執行緒
         List<TcpClient> ListServerClient = new List<TcpClient>();  //紀錄SERVER 的連線端
+        List<NetworkStream> ListServerNetworkStream = new List<NetworkStream>();  //紀錄SERVER 的連線端
 
         public IPLibrary()
         {
@@ -289,6 +290,10 @@ namespace TCPIP
                         {
                             ListeningGetData(client);
                             Console.WriteLine("Close:" + client.Client.RemoteEndPoint.ToString());
+                            //if (IPLibraryDisConnect != null)
+                            //{
+                            //    IPLibraryDisConnect(this, null);
+                            //}
                             client.Close();
                             ListServerClient.Remove(client);
                             client = null;
@@ -299,6 +304,10 @@ namespace TCPIP
             }
             catch (SocketException ex)
             {
+                //if (IPLibraryDisConnect != null)
+                //{
+                //    IPLibraryDisConnect(this, null);
+                //}
                 Console.WriteLine("SocketException: {0}", ex);
             }
         }
@@ -327,7 +336,7 @@ namespace TCPIP
                         {
                             IPLibraryReceiveMsg(this, null);
                         }
-                        
+
                     }
                     //測試是否連線
                     if (client.Connected && client.Client.Poll(0, SelectMode.SelectRead))
@@ -340,8 +349,47 @@ namespace TCPIP
             }
             catch (Exception ex)
             {
+                if (IPLibraryDisConnect != null)
+                {
+                    IPLibraryDisConnect(this, null);
+                }
                 Console.WriteLine("SocketException: {0}", ex);
             }
+        }
+
+        private void ServerWriteData(string _HexStrSend)
+        {
+            try
+            {
+
+                for (int i = 0; i < ListServerClient.Count; i++)
+                {
+                    TcpClient mclient = ListServerClient[i];
+                    if (mclient != null && mclient.Connected && _HexStrSend != "")
+                    {
+                        NetworkStream stream = mclient.GetStream();
+                        //將字串轉 byte 陣列，使用 ASCII 編碼
+                        //Byte[] myBytes = Encoding.ASCII.GetBytes(strTest);
+                        byte[] myBytes = CharClass.ConvertHexStrToByteArray(_HexStrSend);
+
+                        Console.WriteLine("將字串寫入資料流　!!" + _HexStrSend);
+                        //將字串寫入資料流
+                        stream.Write(myBytes, 0, myBytes.Length);
+                        if (IPLibrarySendMsg != null)
+                        {
+                            IPLibrarySendMsg(this, null);
+                        }
+
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+
         }
 
         private int Client(IPAddress _LocalIP, int _LocalPort)
@@ -377,13 +425,13 @@ namespace TCPIP
             StrSendMsg = StrSend;
             if (ConnectionType == SocketType.Server)
             {
-
+                ServerWriteData(StrSend);
             }
             else
             {
                 ClientWriteData(StrSend);
             }
-            
+
         }
 
 
@@ -452,7 +500,7 @@ namespace TCPIP
 
                     Console.WriteLine("\n接收服务端发来的数据: " + receiveMsg);
 
-                 
+
                     Thread.Sleep(100);
                     //  break;
                 }
@@ -488,7 +536,7 @@ namespace TCPIP
             {
                 if (myTcpClient.Connected)
                 {
-                    
+
 
                     while (true)
                     {
@@ -517,7 +565,7 @@ namespace TCPIP
             {
                 DisConnection();
             }
-            
+
         }
         public void DisConnection()
         {
@@ -525,7 +573,7 @@ namespace TCPIP
             {
                 IPLibraryDisConnect(this, null);
             }
-            
+
             try
             {
                 Thread.Sleep(20);

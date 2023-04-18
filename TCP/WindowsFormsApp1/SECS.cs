@@ -73,6 +73,7 @@ namespace WindowsFormsApp1
         {
             get { return _SeparateRequest + StrTimeByte; }
         }
+
     }
 
     internal class SECS
@@ -81,9 +82,13 @@ namespace WindowsFormsApp1
         public enum DataType
         {
             LIST = 0x1,
+            LIST_2 = 0x2,
+            LIST_3 = 0x3,
             BINARY = 0x21,
             BOOLEAN = 0x25,
             ASCII = 0x41,
+            ASCII_2 = 0x42,
+            ASCII_3 = 0x43,
             INT_8 = 0x61,
             INT_1 = 0x65,
             INT_2 = 0x69,
@@ -495,21 +500,21 @@ namespace WindowsFormsApp1
             OLDListSecSItems = new List<SECSItem>();
 
         }
-        public static string strName;
-        public static string Description;
-        public static int intStreams;
-        public static int intFunctions;
-        public static int intItemCount;
+        public  string strName;
+        public  string Description;
+        public  int intStreams;
+        public  int intFunctions;
+        public  int intItemCount;
         public readonly DataType DataType = SECS.DataType.LIST;
         public List<SECSItem> ListSecSItems;
         private List<SECSItem> OLDListSecSItems;
         private List<SECSItem> tmpListSItemsNolevel; //沒有階層單純存資料用
 
 
-        public static bool isReply = true;
-        public static int intReplyStreams;
-        public static int intReplyFunctions;
-
+        public  bool isReply = true;
+        public  int intReplyStreams;
+        public  int intReplyFunctions;
+        public string StrSystemID;
 
         public void Add(SECSItem _SECSItem)
         {
@@ -587,8 +592,6 @@ namespace WindowsFormsApp1
             }
         }
 
-
-
         public string GetSendString()
         {
             ListSecSItemsTotmpListSItemsNolevel();
@@ -613,7 +616,7 @@ namespace WindowsFormsApp1
             return tmpSend;
         }
 
-        public static string ConfigDeviceSxFyString()
+        public string ConfigDeviceSxFyString()
         {
             string gStr = string.Empty;
             string dev = GetDeviceID(SECS.strDeviceID);
@@ -627,7 +630,8 @@ namespace WindowsFormsApp1
             {
                 sf = "0" + sf;
             }
-            gStr = dev  + sf + "000000000001";
+            StrSystemID = SECS.StrSystemByte;
+            gStr = dev  + sf + "0000" + StrSystemID;
             return gStr;
         }
 

@@ -53,6 +53,8 @@
             this.picYellow = new System.Windows.Forms.PictureBox();
             this.txtSendMsg = new System.Windows.Forms.TextBox();
             this.txtReceiveMsg = new System.Windows.Forms.TextBox();
+            this.labSend = new System.Windows.Forms.Label();
+            this.labReceive = new System.Windows.Forms.Label();
             this.groBoxEthernetSetting.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picEthernetConnect)).BeginInit();
             this.palEthernetSetting.SuspendLayout();
@@ -93,7 +95,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(1074, 671);
+            this.button1.Location = new System.Drawing.Point(778, 526);
             this.button1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(261, 116);
@@ -328,10 +330,10 @@
             this.txtSendMsg.BackColor = System.Drawing.SystemColors.WindowText;
             this.txtSendMsg.Font = new System.Drawing.Font("標楷體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.txtSendMsg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.txtSendMsg.Location = new System.Drawing.Point(41, 323);
+            this.txtSendMsg.Location = new System.Drawing.Point(12, 769);
             this.txtSendMsg.Multiline = true;
             this.txtSendMsg.Name = "txtSendMsg";
-            this.txtSendMsg.Size = new System.Drawing.Size(518, 150);
+            this.txtSendMsg.Size = new System.Drawing.Size(677, 187);
             this.txtSendMsg.TabIndex = 9;
             // 
             // txtReceiveMsg
@@ -339,17 +341,39 @@
             this.txtReceiveMsg.BackColor = System.Drawing.SystemColors.WindowText;
             this.txtReceiveMsg.Font = new System.Drawing.Font("標楷體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.txtReceiveMsg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.txtReceiveMsg.Location = new System.Drawing.Point(41, 585);
+            this.txtReceiveMsg.Location = new System.Drawing.Point(707, 769);
             this.txtReceiveMsg.Multiline = true;
             this.txtReceiveMsg.Name = "txtReceiveMsg";
-            this.txtReceiveMsg.Size = new System.Drawing.Size(518, 150);
+            this.txtReceiveMsg.Size = new System.Drawing.Size(677, 187);
             this.txtReceiveMsg.TabIndex = 9;
+            // 
+            // labSend
+            // 
+            this.labSend.AutoSize = true;
+            this.labSend.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.labSend.Location = new System.Drawing.Point(12, 742);
+            this.labSend.Name = "labSend";
+            this.labSend.Size = new System.Drawing.Size(61, 24);
+            this.labSend.TabIndex = 10;
+            this.labSend.Text = "Send:";
+            // 
+            // labReceive
+            // 
+            this.labReceive.AutoSize = true;
+            this.labReceive.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.labReceive.Location = new System.Drawing.Point(703, 742);
+            this.labReceive.Name = "labReceive";
+            this.labReceive.Size = new System.Drawing.Size(88, 24);
+            this.labReceive.TabIndex = 10;
+            this.labReceive.Text = "Receive:";
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1396, 968);
+            this.Controls.Add(this.labReceive);
+            this.Controls.Add(this.labSend);
             this.Controls.Add(this.txtReceiveMsg);
             this.Controls.Add(this.txtSendMsg);
             this.Controls.Add(this.picYellow);
@@ -362,6 +386,7 @@
             this.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.Name = "Main";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Main_FormClosing);
             this.Load += new System.EventHandler(this.Main_Load);
             this.groBoxEthernetSetting.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picEthernetConnect)).EndInit();
@@ -403,6 +428,8 @@
         private System.Windows.Forms.PictureBox picEthernetConnect;
         private System.Windows.Forms.TextBox txtSendMsg;
         private System.Windows.Forms.TextBox txtReceiveMsg;
+        private System.Windows.Forms.Label labSend;
+        private System.Windows.Forms.Label labReceive;
     }
 }
 

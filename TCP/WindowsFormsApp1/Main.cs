@@ -15,6 +15,14 @@ namespace TCPIP
     public partial class Main : Form
     {
         IPLibrary pLibrary = new IPLibrary();
+        Thread threadTtimeOut;
+        bool isTtimeOut;
+        DateTime[] TimeHSMS_T = new DateTime[9];
+
+        string StrReceive = "";
+        List<string> ListStrReceive = new List<string>();
+        DateTime TimeReceive;
+
         public Main()
         {
             InitializeComponent();
@@ -27,23 +35,59 @@ namespace TCPIP
             pLibrary.DisConnect += PLibrary_DisConnect;
             pLibrary.ReceiveMsg += PLibrary_ReceiveMsg;
             pLibrary.SendMsg += PLibrary_SendMsg;
+
+            for (int i = 0; i < TimeHSMS_T.Length; i++)
+            {
+                TimeHSMS_T[i] = new DateTime();
+            }
+            isTtimeOut = true;
+            threadTtimeOut = new Thread(HSMStime);
+            threadTtimeOut.Start();
+        }
+        private void Main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            isTtimeOut = false;
         }
 
-      
+        private void HSMStime()
+        {
+            while (isTtimeOut)
+            {
+
+            }
+        }
 
         private void btnTest_Click(object sender, EventArgs e)
         {
             try
             {
-                string str = SecsSessionType.SelectRequest;
-                str = SECS.GetDataLenHead(str) + str;
-                pLibrary.Send(str);
+                string str;
+                if (radbtnActive.Checked)
+                {
+                    str = SecsSessionType.SelectRequest;
+                    str = SECS.GetDataLenHead(str) + str;
+                    pLibrary.Send(str);
 
-                Thread.Sleep(100);
+                    Thread.Sleep(100);
 
-                str = SecsSessionType.LinktestResponse;
-                str = SECS.GetDataLenHead(str) + str;
-                pLibrary.Send(str);
+                    str = SecsSessionType.LinktestResponse;
+                    str = SECS.GetDataLenHead(str) + str;
+                    pLibrary.Send(str);
+                }
+                else
+                {
+                    Thread.Sleep(1000);
+                    str = SecsSessionType.SelectResponse;
+                    str = SECS.GetDataLenHead(str) + str;
+                    pLibrary.Send(str);
+
+                    Thread.Sleep(500);
+
+                    str = SecsSessionType.LinktestRequest;
+                    str = SECS.GetDataLenHead(str) + str;
+                    pLibrary.Send(str);
+                }
+
                 //string strRAW = "";
                 //pLibrary.LocalIP = txtRemoteIP.Text;
                 //pLibrary.LocalPort = txtRemotePort.Text;
@@ -115,7 +159,7 @@ namespace TCPIP
             tt = SECS.GetDataLenHead(tt) + tt;
             
             pLibrary.Send(tt);
-            Console.WriteLine(tt);
+       //     Console.WriteLine(tt);
             //  S6F11.ListSecSItems.Add();
             //string StrTime = SecsSessionType.SeparateRequest;
             //string strRAW = SECS.StrSystemByte;//  "";
@@ -208,7 +252,6 @@ namespace TCPIP
             // throw new NotImplementedException();
         }
 
-
         private void PLibrary_ReceiveMsg(object sender, EventArgs e)
         {
             if (this.InvokeRequired)
@@ -221,7 +264,7 @@ namespace TCPIP
             }
             txtReceiveMsg.Text = pLibrary.StrReceiveMsg;
 
-            // throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         private void PLibrary_DisConnect(object sender, EventArgs e)
@@ -269,7 +312,6 @@ namespace TCPIP
             MainFormDisConnect();
         }
 
-
-
+       
     }
 }
