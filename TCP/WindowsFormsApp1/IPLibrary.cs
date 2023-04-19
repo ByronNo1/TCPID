@@ -161,7 +161,7 @@ namespace TCPIP
         NetworkStream myNetworkStream = null;
         //宣告 Tcp 用戶端物件
         TcpClient myTcpClient = null;
-
+        bool isClientReadData = true;
 
 
         /// <summary>
@@ -173,12 +173,18 @@ namespace TCPIP
         List<TcpClient> ListServerClient = new List<TcpClient>();  //紀錄SERVER 的連線端
         List<NetworkStream> ListServerNetworkStream = new List<NetworkStream>();  //紀錄SERVER 的連線端
 
+
+
+
         public IPLibrary()
         {
 
         }
 
-
+        ~IPLibrary()
+        {
+            isClientReadData = false;
+        }
         public event EventHandler ConnectOK
         {
             add
@@ -511,21 +517,29 @@ namespace TCPIP
 
         private void ClientWriteData(string _HexStrSend)
         {
-            if (myTcpClient != null && myTcpClient.Connected && _HexStrSend != "")
+            try
             {
-                //將字串轉 byte 陣列，使用 ASCII 編碼
-                //Byte[] myBytes = Encoding.ASCII.GetBytes(strTest);
-                byte[] myBytes = CharClass.ConvertHexStrToByteArray(_HexStrSend);
-
-                Console.WriteLine("將字串寫入資料流　!!" + _HexStrSend);
-                //將字串寫入資料流
-                myNetworkStream.Write(myBytes, 0, myBytes.Length);
-                if (IPLibrarySendMsg != null)
+                if (myTcpClient != null && myTcpClient.Connected && _HexStrSend != "")
                 {
-                    IPLibrarySendMsg(this, null);
+                    //將字串轉 byte 陣列，使用 ASCII 編碼
+                    //Byte[] myBytes = Encoding.ASCII.GetBytes(strTest);
+                    byte[] myBytes = CharClass.ConvertHexStrToByteArray(_HexStrSend);
+
+                    Console.WriteLine("將字串寫入資料流　!!" + _HexStrSend);
+                    //將字串寫入資料流
+                    myNetworkStream.Write(myBytes, 0, myBytes.Length);
+                    if (IPLibrarySendMsg != null)
+                    {
+                        IPLibrarySendMsg(this, null);
+                    }
+
                 }
+            }
+            catch (Exception)
+            {
 
             }
+        
 
         }
 
@@ -538,7 +552,7 @@ namespace TCPIP
                 {
 
 
-                    while (true)
+                    while (isClientReadData)
                     {
                         Thread.Sleep(5);
                         if (myTcpClient.Connected && myNetworkStream.DataAvailable)
@@ -555,6 +569,14 @@ namespace TCPIP
                             if (IPLibraryReceiveMsg != null)
                             {
                                 IPLibraryReceiveMsg(this, null);
+                            }
+                        }
+                        else
+                        {
+                            if (myTcpClient.Connected == false)
+                            {
+                                DisConnection();
+                                break;
                             }
                         }
                     }

@@ -43,35 +43,35 @@ namespace WindowsFormsApp1
 
         public static string SelectRequest
         {
-            get { return _SelectRequest + StrTimeByte; }
+            get { return _SelectRequest; }
         }
         public static string SelectResponse
         {
-            get { return _SelectResponse + StrTimeByte; }
+            get { return _SelectResponse ; }
         }
         public static string DeselectRequest
         {
-            get { return _DeselectRequest + StrTimeByte; }
+            get { return _DeselectRequest ; }
         }
         public static string DeselectResponse
         {
-            get { return _DeselectResponse + StrTimeByte; }
+            get { return _DeselectResponse ; }
         }
         public static string LinktestRequest
         {
-            get { return _LinktestRequest + StrTimeByte; }
+            get { return _LinktestRequest ; }
         }
         public static string LinktestResponse
         {
-            get { return _LinktestResponse + StrTimeByte; }
+            get { return _LinktestResponse ; }
         }
         public static string RejectRequest
         {
-            get { return _RejectRequest + StrTimeByte; }
+            get { return _RejectRequest ; }
         }
         public static string SeparateRequest
         {
-            get { return _SeparateRequest + StrTimeByte; }
+            get { return _SeparateRequest ; }
         }
 
     }

@@ -55,6 +55,7 @@
             this.txtReceiveMsg = new System.Windows.Forms.TextBox();
             this.labSend = new System.Windows.Forms.Label();
             this.labReceive = new System.Windows.Forms.Label();
+            this.listBox1 = new System.Windows.Forms.ListBox();
             this.groBoxEthernetSetting.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picEthernetConnect)).BeginInit();
             this.palEthernetSetting.SuspendLayout();
@@ -66,7 +67,7 @@
             // 
             // btnTest
             // 
-            this.btnTest.Location = new System.Drawing.Point(1073, 526);
+            this.btnTest.Location = new System.Drawing.Point(619, 232);
             this.btnTest.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(261, 116);
@@ -95,7 +96,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(778, 526);
+            this.button1.Location = new System.Drawing.Point(1077, 552);
             this.button1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(261, 116);
@@ -367,11 +368,21 @@
             this.labReceive.TabIndex = 10;
             this.labReceive.Text = "Receive:";
             // 
+            // listBox1
+            // 
+            this.listBox1.FormattingEnabled = true;
+            this.listBox1.ItemHeight = 18;
+            this.listBox1.Location = new System.Drawing.Point(12, 12);
+            this.listBox1.Name = "listBox1";
+            this.listBox1.Size = new System.Drawing.Size(500, 706);
+            this.listBox1.TabIndex = 11;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1396, 968);
+            this.Controls.Add(this.listBox1);
             this.Controls.Add(this.labReceive);
             this.Controls.Add(this.labSend);
             this.Controls.Add(this.txtReceiveMsg);
@@ -430,6 +441,7 @@
         private System.Windows.Forms.TextBox txtReceiveMsg;
         private System.Windows.Forms.Label labSend;
         private System.Windows.Forms.Label labReceive;
+        private System.Windows.Forms.ListBox listBox1;
     }
 }
 
