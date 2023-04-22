@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,12 +24,17 @@ namespace TCPIP
 
 
         List<SecsTransaction> ListSendTrans = new List<SecsTransaction>();
-        List<string[]> ListSendSecsSession = new List<string[]>();
+        List<string[]> ListStrSendSecsSession = new List<string[]>();
 
 
         string StrReceive = "";
         List<string> ListStrReceive = new List<string>();
         DateTime TimeReceive;
+
+        private static object Objectlock = new object();
+
+
+        Queue QueReceiveData = new Queue();
 
         public Main()
         {
@@ -67,35 +75,46 @@ namespace TCPIP
         {
             try
             {
-                string str;
-                if (radbtnActive.Checked)
-                {
-                    SendData(SecsSessionType.SelectRequest);
-                    //str = SecsSessionType.SelectRequest;
-                    //str = SECS.GetDataLenHead(str) + str;
-                    //pLibrary.Send(str);
 
-                    Thread.Sleep(100);
+                ListStrReceive.Clear();
+                ListStrReceive.Add("0000000C0000060C00000000");
+                ListStrReceive.Add("80022100");
+                ParserReceiveMsg(ListStrReceive); //將字串分析後
+                //string str = "FF";
+                //int tmpI = 0;
+                ////tmpI = Convert.ToInt32(str, 16);
+                // int.TryParse(str, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out tmpI);
+                //int.TryParse(str, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out tmpI);
+                //tmpI = tmpI;
+                //string str;
+                //if (radbtnActive.Checked)
+                //{
+                //    SendData(SecsSessionType.SelectRequest);
+                //    //str = SecsSessionType.SelectRequest;
+                //    //str = SECS.GetDataLenHead(str) + str;
+                //    //pLibrary.Send(str);
 
-                    SendData(SecsSessionType.LinktestResponse);
-                    //str = SecsSessionType.LinktestResponse;
-                    //str = SECS.GetDataLenHead(str) + str;
-                    //pLibrary.Send(str);
-                }
-                else
-                {
-                    Thread.Sleep(1000);
-                    SendData(SecsSessionType.SelectResponse);
-                    //str = SecsSessionType.SelectResponse;
-                    //str = SECS.GetDataLenHead(str) + str;
-                    //pLibrary.Send(str);
+                //    Thread.Sleep(100);
 
-                    Thread.Sleep(500);
-                    SendData(SecsSessionType.LinktestRequest);
-                    //str = SecsSessionType.LinktestRequest;
-                    //str = SECS.GetDataLenHead(str) + str;
-                    //pLibrary.Send(str);
-                }
+                //    SendData(SecsSessionType.LinktestResponse);
+                //    //str = SecsSessionType.LinktestResponse;
+                //    //str = SECS.GetDataLenHead(str) + str;
+                //    //pLibrary.Send(str);
+                //}
+                //else
+                //{
+                //    Thread.Sleep(1000);
+                //    SendData(SecsSessionType.SelectResponse);
+                //    //str = SecsSessionType.SelectResponse;
+                //    //str = SECS.GetDataLenHead(str) + str;
+                //    //pLibrary.Send(str);
+
+                //    Thread.Sleep(500);
+                //    SendData(SecsSessionType.LinktestRequest);
+                //    //str = SecsSessionType.LinktestRequest;
+                //    //str = SECS.GetDataLenHead(str) + str;
+                //    //pLibrary.Send(str);
+                //}
 
                 //string strRAW = "";
                 //pLibrary.LocalIP = txtRemoteIP.Text;
@@ -166,9 +185,9 @@ namespace TCPIP
 
             string tt = S6F11.GetSendString();
             tt = SECS.GetDataLenHead(tt) + tt;
-            
+
             pLibrary.Send(tt);
-       //     Console.WriteLine(tt);
+            //     Console.WriteLine(tt);
             //  S6F11.ListSecSItems.Add();
             //string StrTime = SecsSessionType.SeparateRequest;
             //string strRAW = SECS.StrSystemByte;//  "";
@@ -203,7 +222,7 @@ namespace TCPIP
         private void btnConnect_Click(object sender, EventArgs e)
         {
             MainFormConnect();
-          //  btnTest_Click(sender, e);
+            //  btnTest_Click(sender, e);
         }
         private void MainFormConnect()
         {
@@ -221,7 +240,7 @@ namespace TCPIP
 
             pLibrary.LocalIP = txtLocalIP.Text;
             pLibrary.LocalPort = txtLocalPort.Text;
-            pLibrary.RemoteIP  = txtRemoteIP.Text;
+            pLibrary.RemoteIP = txtRemoteIP.Text;
             pLibrary.RemotePort = txtRemotePort.Text;
 
             if (radbtnPassive.Checked)
@@ -252,7 +271,7 @@ namespace TCPIP
         }
 
         private void PLibrary_SendMsg(object sender, EventArgs e)
-        {
+        {//顯示送出的字串
             if (this.InvokeRequired)
             {
                 this.BeginInvoke(new Action(() =>
@@ -266,7 +285,7 @@ namespace TCPIP
         }
 
         private void PLibrary_ReceiveMsg(object sender, EventArgs e)
-        {
+        {  //收到的字串都記錄到 ListStrReceive
             if (this.InvokeRequired)
             {
                 this.BeginInvoke(new Action(() =>
@@ -277,73 +296,203 @@ namespace TCPIP
             }
             txtReceiveMsg.Text = pLibrary.StrReceiveMsg;
             ListStrReceive.Add(pLibrary.StrReceiveMsg);
-            TimeReceive = DateTime.Now;
-            ParserReceiveMsg(ListStrReceive);
+            TimeReceive = DateTime.Now;       //紀錄收到的時間，作為後續判斷
+            ParserReceiveMsg(ListStrReceive); //將字串分析後
             //throw new NotImplementedException();
         }
 
+        private void LogAdd(string _str)
+        {
+            if (listBoxLog.InvokeRequired)
+            {
+                listBoxLog.BeginInvoke(new Action(() =>
+                {
+                    LogAdd(_str);
+                }));
+                return;
+            }
 
-        private void listBox1ADD(string _string)
+            if (listBoxLog.Items.Count > 100)
+            {
+                listBoxLog.Items.Clear();
+            }
+            listBoxLog.Items.Add(_str);
+        }
+
+        private void listBox1ADD(string _str)
         {
             if (listBox1.InvokeRequired)
             {
                 listBox1.BeginInvoke(new Action(() =>
                 {
-                    listBox1ADD(_string);
+                    listBox1ADD(_str);
                 }));
                 return;
-            } 
+            }
 
             if (listBox1.Items.Count > 100)
             {
                 listBox1.Items.Clear();
             }
-            listBox1.Items.Add(_string);
+            listBox1.Items.Add(_str);
         }
 
-        private void ParserReceiveMsg(List<string> _listStr)
+        private void ParserReceiveMsg(List<string> _listStr) // 解析收到字串
         {
             string TmpStr = "";
             string TmpStrData = "";
             string TmpStrNext = "";
             string StrCount = "";
             int Count = 0;
-            for (int i = 0; i < _listStr.Count; i++)
+            try
             {
-                TmpStr = _listStr[i];
-                do
+                lock (Objectlock)
                 {
-                    TmpStrNext = "";
-                    if (TmpStr.Length > 12)
+                    for (int i = 0; i < _listStr.Count; i++)
                     {
-                        StrCount = TmpStr.Substring(0, 8);
-                        Count = Convert.ToInt16(StrCount, 16);
-                        if (Count * 2 <= TmpStr.Length - 8) //判斷要收資料是不是大於以收到的資料
+                        TmpStr = _listStr[i];
+                        if (TmpStr != null)
                         {
-                            TmpStrData = TmpStr.Substring(8, Count * 2);
-                            listBox1ADD(StrCount+ TmpStrData);
-                            if (TmpStr.Length - 8 > Count * 2)
+                            #region 單行字串解析
+                            do
                             {
-                                TmpStrNext = TmpStr.Substring(8 + Count * 2, TmpStr.Length - 8 - Count * 2);
-                                TmpStr = TmpStrNext;
-                            }
-                            else
-                            {
+                                TmpStrNext = ""; //字串下一個DATA
+                                TmpStrData = ""; //本次取得的DATA
+                                if (TmpStr.Length > 8)
+                                {
+                                    StrCount = TmpStr.Substring(0, 8);  // 取出有多少的個數
 
-                            }
+                                    if (int.TryParse(StrCount, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out Count))
+                                    {
+                                        if (Count * 2 <= TmpStr.Length - 8) //判斷要收資料是不是大於以收到的資料
+                                        {
+                                            TmpStrData = TmpStr.Substring(8, Count * 2);
+                                            if (TmpStr.Length - 8 > Count * 2)
+                                            {
+                                                TmpStrNext = TmpStr.Substring(8 + Count * 2, TmpStr.Length - 8 - Count * 2);
+                                                TmpStr = TmpStrNext;
+                                            }
+                                            else if (TmpStr.Length - 8 == Count * 2)
+                                            {
+                                                TmpStr = "";//代表解析完成
+                                            }
+                                            else
+                                            {
+                                                //保留
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            //要判斷是不是已經收完資料
+                                        }
+                                    }
+                                    else
+                                    {
+                                        break; //收到的字串無法轉換成int
+                                    }
+
+                                }
+                                if (TmpStrData != "")
+                                {
+                                    listBox1ADD(StrCount + TmpStrData);
+                                    QueReceiveData.Enqueue(StrCount + TmpStrData); //整理過的DATA 紀錄到Queue，準備之後回復用
+                                }
+                            } while (TmpStrNext != "");
+                            #endregion
 
                         }
-                        else
+                        #region 判斷後續有沒有值
+                        if (TmpStr == "")  //代表這行已經收完
                         {
-                             //要判斷是不是已經收完資料
+                            _listStr.RemoveAt(0);
+                            i --;
                         }
+                        else 
+                        { //沒有收完把後面的往前面合併
+
+                            if (_listStr.Count >= 2) //先確認有收到後面的值
+                            {
+                                _listStr[0] = TmpStr + _listStr[1]; //把後面的往前面合併
+                                _listStr.RemoveAt(1);
+                                i --;
+                            }
+                        }
+                        #endregion
+
 
                     }
-                } while (TmpStrNext != "");
-                
 
-                _listStr.RemoveAt(0);
-                i = 0;
+
+                    while (QueReceiveData.Count > 0)
+                    {
+                        CheckReceiveStr((string)QueReceiveData.Dequeue());
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+
+
+
+
+        }
+
+        private void CheckReceiveStr(string _str)
+        {
+
+            string StrSystem = "";
+            string StrCount = _str.Substring(0, 8);  // 取出有多少的個數
+            string StrData = _str.Substring(8, _str.Length - 8);
+
+            if (StrData.Substring(0, 10) == "FFFF000000")
+            {
+                CheckSecsSession(StrData);
+            }
+            else
+            {
+
+            }
+
+
+        }
+
+        private void CheckSecsSession(string _str)
+        {
+            string StrData = "";
+            string StrSystem = "";
+
+            StrData = _str.Substring(0, 12);
+            LogAdd("StrData:" + StrData);
+            StrSystem = _str.Substring(12, _str.Length - 12);
+            LogAdd("StrSystem:" + StrSystem);
+            switch (StrData)
+            {
+                case SecsSessionType.SelectRequest:
+                    SendData(SecsSessionType.SelectResponse, StrSystem);
+                    break;
+                case SecsSessionType.SelectResponse:
+                    break;
+                case SecsSessionType.DeselectRequest:
+                    SendData(SecsSessionType.DeselectResponse, StrSystem);
+                    break;
+                case SecsSessionType.DeselectResponse:
+                    break;
+                case SecsSessionType.LinktestRequest:
+                    SendData(SecsSessionType.LinktestResponse, StrSystem);
+                    break;
+                case SecsSessionType.LinktestResponse:
+                    break;
+                case SecsSessionType.RejectRequest:
+                    break;
+                case SecsSessionType.SeparateRequest:
+                    break;
+
             }
         }
 
@@ -386,22 +535,25 @@ namespace TCPIP
             pLibrary.Send(str);
             Thread.Sleep(20);
             pLibrary.DisConnection();
-           
+
         }
         private void btnDisConnected_Click(object sender, EventArgs e)
         {
             MainFormDisConnect();
         }
 
-        private void SendData(string _str)
+        private void SendData(string _str, string _strSystem = "")
         {
-            
+
             string _strSend = "";
-            string strSystem = "";
-            if (_str.Substring(0,10) == "FFFF000000")
+            string strSystem = _strSystem;
+            if (_str.Substring(0, 10) == "FFFF000000")
             {
                 string[] sStr = new string[3];
-                strSystem = SECS.StrSystemByte;
+                if (strSystem == "")
+                {
+                    strSystem = SECS.StrSystemByte;
+                }
                 _strSend = SECS.GetDataLenHead(_str + strSystem) + _str + strSystem;
                 sStr[0] = _strSend;
                 sStr[1] = _str;
@@ -409,7 +561,6 @@ namespace TCPIP
                 pLibrary.Send(_strSend);
             }
         }
-      
 
 
 

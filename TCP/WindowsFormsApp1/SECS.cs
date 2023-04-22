@@ -31,48 +31,15 @@ namespace WindowsFormsApp1
         //           Reject.req
         //           收到无效消息时发送
 
-        private const string _SelectRequest = "FFFF00000001";
-        private const string _SelectResponse = "FFFF00000002";
-        private const string _DeselectRequest = "FFFF00000003";
-        private const string _DeselectResponse = "FFFF00000004";
-        private const string _LinktestRequest = "FFFF00000005";
-        private const string _LinktestResponse = "FFFF00000006";
-        private const string _RejectRequest = "FFFF00000007";
-        private const string _SeparateRequest = "FFFF00000009";
+        public const string SelectRequest = "FFFF00000001";
+        public const string SelectResponse = "FFFF00000002";
+        public const string DeselectRequest = "FFFF00000003";
+        public const string DeselectResponse = "FFFF00000004";
+        public const string LinktestRequest = "FFFF00000005";
+        public const string LinktestResponse = "FFFF00000006";
+        public const string RejectRequest = "FFFF00000007";
+        public const string SeparateRequest = "FFFF00000009";
 
-
-        public static string SelectRequest
-        {
-            get { return _SelectRequest; }
-        }
-        public static string SelectResponse
-        {
-            get { return _SelectResponse ; }
-        }
-        public static string DeselectRequest
-        {
-            get { return _DeselectRequest ; }
-        }
-        public static string DeselectResponse
-        {
-            get { return _DeselectResponse ; }
-        }
-        public static string LinktestRequest
-        {
-            get { return _LinktestRequest ; }
-        }
-        public static string LinktestResponse
-        {
-            get { return _LinktestResponse ; }
-        }
-        public static string RejectRequest
-        {
-            get { return _RejectRequest ; }
-        }
-        public static string SeparateRequest
-        {
-            get { return _SeparateRequest ; }
-        }
 
     }
 
@@ -500,20 +467,20 @@ namespace WindowsFormsApp1
             OLDListSecSItems = new List<SECSItem>();
 
         }
-        public  string strName;
-        public  string Description;
-        public  int intStreams;
-        public  int intFunctions;
-        public  int intItemCount;
+        public string strName;
+        public string Description;
+        public int intStreams;
+        public int intFunctions;
+        public int intItemCount;
         public readonly DataType DataType = SECS.DataType.LIST;
         public List<SECSItem> ListSecSItems;
         private List<SECSItem> OLDListSecSItems;
         private List<SECSItem> tmpListSItemsNolevel; //沒有階層單純存資料用
 
 
-        public  bool isReply = true;
-        public  int intReplyStreams;
-        public  int intReplyFunctions;
+        public bool isReply = true;
+        public int intReplyStreams;
+        public int intReplyFunctions;
         public string StrSystemID;
 
         public void Add(SECSItem _SECSItem)
@@ -526,10 +493,10 @@ namespace WindowsFormsApp1
             AddLevelSecSItems(ListSecSItems, _SECSItem);
             //NoleveltoListSecSItems();
 
-           // AddB(new SECSItem(_SECSItem));
+            // AddB(new SECSItem(_SECSItem));
         }
 
-       
+
 
         private void ListSecSItemsTotmpListSItemsNolevel()
         {
@@ -552,35 +519,35 @@ namespace WindowsFormsApp1
 
             List<SECSItem> tmpListSecSItemsA = null;
             List<SECSItem> OLDListSecSItemsA = new List<SECSItem>();
-            getNeedListSecSItems(_ListSecSItems,ref OLDListSecSItemsA);
+            getNeedListSecSItems(_ListSecSItems, ref OLDListSecSItemsA);
 
-            for (int i = 0; i < OLDListSecSItemsA.Count; i++) 
+            for (int i = 0; i < OLDListSecSItemsA.Count; i++)
             {//從最新的往前找。
                 if (OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].intItemCount > OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].ListSecSItems.Count)
                 {
                     tmpListSecSItemsA = OLDListSecSItemsA[OLDListSecSItemsA.Count - 1].ListSecSItems;
                 }
-                
+
             }
-            if (tmpListSecSItemsA == null )  // 代表第一次 找
+            if (tmpListSecSItemsA == null)  // 代表第一次 找
             {
                 _ListSecSItems.Add(_tmpSECSItem);
             }
             else
             {
-                tmpListSecSItemsA.Add(new SECSItem (_tmpSECSItem));
+                tmpListSecSItemsA.Add(new SECSItem(_tmpSECSItem));
             }
         }
 
 
         //找到所有的LIST 
-        private void getNeedListSecSItems(List<SECSItem> _ListSecSItems,ref List<SECSItem> OLDListSecSItemsA, bool isReEntry = false)
+        private void getNeedListSecSItems(List<SECSItem> _ListSecSItems, ref List<SECSItem> OLDListSecSItemsA, bool isReEntry = false)
         {
             int index = _ListSecSItems.Count;
             if (index == 0 && isReEntry == false)
             {
                 OLDListSecSItemsA = _ListSecSItems;
-                return ;
+                return;
             }
             for (int i = 0; i < _ListSecSItems.Count; i++)
             {
@@ -620,8 +587,8 @@ namespace WindowsFormsApp1
         {
             string gStr = string.Empty;
             string dev = GetDeviceID(SECS.strDeviceID);
-            string sf ;
-            sf = (intStreams.ToString("X2").ToUpper()).Substring(1,1) + (intFunctions.ToString("X2").PadLeft(2,'0')).ToUpper();
+            string sf;
+            sf = (intStreams.ToString("X2").ToUpper()).Substring(1, 1) + (intFunctions.ToString("X2").PadLeft(2, '0')).ToUpper();
             if (isReply)
             {
                 sf = "8" + sf;
@@ -631,11 +598,11 @@ namespace WindowsFormsApp1
                 sf = "0" + sf;
             }
             StrSystemID = SECS.StrSystemByte;
-            gStr = dev  + sf + "0000" + StrSystemID;
+            gStr = dev + sf + "0000" + StrSystemID;
             return gStr;
         }
 
-        private static string GetDeviceID( string deviceID)
+        private static string GetDeviceID(string deviceID)
         {
             if (deviceID == "")
             {
@@ -700,7 +667,7 @@ namespace WindowsFormsApp1
 
         }
 
-        public static string byteTobyteString(byte[] _bytes,int _GetLLength = -1)
+        public static string byteTobyteString(byte[] _bytes, int _GetLLength = -1)
         {
             string _StrResult = "";
             try
@@ -718,7 +685,7 @@ namespace WindowsFormsApp1
             {
 
             }
-            
+
 
             return _StrResult;
         }

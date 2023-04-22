@@ -56,6 +56,7 @@
             this.labSend = new System.Windows.Forms.Label();
             this.labReceive = new System.Windows.Forms.Label();
             this.listBox1 = new System.Windows.Forms.ListBox();
+            this.listBoxLog = new System.Windows.Forms.ListBox();
             this.groBoxEthernetSetting.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picEthernetConnect)).BeginInit();
             this.palEthernetSetting.SuspendLayout();
@@ -67,7 +68,7 @@
             // 
             // btnTest
             // 
-            this.btnTest.Location = new System.Drawing.Point(619, 232);
+            this.btnTest.Location = new System.Drawing.Point(733, 130);
             this.btnTest.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(261, 116);
@@ -377,11 +378,21 @@
             this.listBox1.Size = new System.Drawing.Size(500, 706);
             this.listBox1.TabIndex = 11;
             // 
+            // listBoxLog
+            // 
+            this.listBoxLog.FormattingEnabled = true;
+            this.listBoxLog.ItemHeight = 18;
+            this.listBoxLog.Location = new System.Drawing.Point(534, 423);
+            this.listBoxLog.Name = "listBoxLog";
+            this.listBoxLog.Size = new System.Drawing.Size(382, 274);
+            this.listBoxLog.TabIndex = 11;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1396, 968);
+            this.Controls.Add(this.listBoxLog);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.labReceive);
             this.Controls.Add(this.labSend);
@@ -442,6 +453,7 @@
         private System.Windows.Forms.Label labSend;
         private System.Windows.Forms.Label labReceive;
         private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.ListBox listBoxLog;
     }
 }
 

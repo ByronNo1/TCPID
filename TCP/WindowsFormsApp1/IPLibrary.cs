@@ -338,6 +338,7 @@ namespace TCPIP
                         sData = CharClass.byteTobyteString(btDatas, intGetL);
                         //     UdpateMessage("Received Data:" + sData);
                         Console.WriteLine("Received Data:" + sData);
+                        StrReceiveMsg = sData;
                         if (IPLibraryReceiveMsg != null)
                         {
                             IPLibraryReceiveMsg(this, null);
@@ -560,10 +561,11 @@ namespace TCPIP
                             byte[] data = new byte[myTcpClient.ReceiveBufferSize];
                             int length = myNetworkStream.Read(data, 0, data.Length);
                             string receiveMsg = "";//= Encoding.UTF8.GetString(data, 0, length);
-                            for (int i = 0; i < length; i++)
-                            {
-                                receiveMsg += data[i].ToString("x2").ToUpper();
-                            }
+                            //for (int i = 0; i < length; i++)
+                            //{
+                            //    receiveMsg += data[i].ToString("x2").ToUpper();
+                            //}
+                            receiveMsg = CharClass.byteTobyteString(data, length);
                             StrReceiveMsg = receiveMsg;
                             Console.WriteLine("收到SERVER的資訊: " + receiveMsg);
                             if (IPLibraryReceiveMsg != null)
