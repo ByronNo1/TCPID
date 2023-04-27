@@ -75,11 +75,29 @@ namespace TCPIP
         {
             try
             {
+                CheckStreamFunReceive("0000000C0000060C0000000080022100");
+                //byte tbyte = 0x8F;
 
-                ListStrReceive.Clear();
-                ListStrReceive.Add("0000000C0000060C00000000");
-                ListStrReceive.Add("80022100");
-                ParserReceiveMsg(ListStrReceive); //將字串分析後
+                //if ((tbyte & 0x80) == 0x80)
+                //{
+                //    Console.WriteLine("OK");
+                //}
+                //else
+                //{
+                //    Console.WriteLine("NG");
+                //}
+
+                //int Itemp = (int)tbyte - (((int)tbyte / 16) * 16);
+
+                //string sStr = Convert.ToString((int)tbyte, 2);
+                //sStr = sStr.Substring(sStr.Length - 4, 4);
+                //Itemp = Convert.ToInt32(sStr, 2);
+                //Console.WriteLine(Itemp);
+
+                //ListStrReceive.Clear();
+                //ListStrReceive.Add("0000000C0000060C00000000");
+                //ListStrReceive.Add("80022100");
+                //ParserReceiveMsg(ListStrReceive); //將字串分析後
                 //string str = "FF";
                 //int tmpI = 0;
                 ////tmpI = Convert.ToInt32(str, 16);
@@ -256,7 +274,7 @@ namespace TCPIP
             {
                 palEthernetSetting.Enabled = false;
                 btnConnect.Enabled = false;
-                if (radbtnActive.Checked)
+                if (radbtnActive.Checked) //主動連線，要發送 SelectRequest請求
                 {
                     SendData(SecsSessionType.SelectRequest);
                 }
@@ -344,6 +362,7 @@ namespace TCPIP
             string TmpStrNext = "";
             string StrCount = "";
             int Count = 0;
+            int Ilength = 0;
             try
             {
                 lock (Objectlock)
@@ -405,23 +424,31 @@ namespace TCPIP
                         #region 判斷後續有沒有值
                         if (TmpStr == "")  //代表這行已經收完
                         {
-                            _listStr.RemoveAt(0);
-                            i --;
+                            _listStr[i] = null;
                         }
-                        else 
+                        else
                         { //沒有收完把後面的往前面合併
 
-                            if (_listStr.Count >= 2) //先確認有收到後面的值
+                            if (_listStr.Count >= i + 1) //先確認有收到後面的值
                             {
-                                _listStr[0] = TmpStr + _listStr[1]; //把後面的往前面合併
-                                _listStr.RemoveAt(1);
-                                i --;
+                                _listStr[i + 1] = TmpStr + _listStr[i + 1]; //把後面的往前面合併
+                                _listStr[i] = null;
                             }
                         }
                         #endregion
 
-
                     }
+
+                    #region 將空值清除
+                    Ilength = _listStr.Count;
+                    for (int i = 0; i < Ilength; i++)
+                    {
+                        if (_listStr[Ilength - 1 - i] == null)
+                        {
+                            _listStr.RemoveAt(Ilength - 1 - i);
+                        }
+                    }
+                    #endregion
 
 
                     while (QueReceiveData.Count > 0)
@@ -450,9 +477,9 @@ namespace TCPIP
             string StrCount = _str.Substring(0, 8);  // 取出有多少的個數
             string StrData = _str.Substring(8, _str.Length - 8);
 
-            if (StrData.Substring(0, 10) == "FFFF000000")
+            if (StrData.Substring(0, 10) == "FFFF000000") //這是 T1~T9之類的
             {
-                CheckSecsSession(StrData);
+                CheckSecsSession(_str);
             }
             else
             {
@@ -464,10 +491,11 @@ namespace TCPIP
 
         private void CheckSecsSession(string _str)
         {
-            string StrData = "";
+            string StrCount = _str.Substring(0, 8);  // 取出有多少的個數
+            string StrNoCount = _str.Substring(8, _str.Length - 8);
             string StrSystem = "";
 
-            StrData = _str.Substring(0, 12);
+            string StrData = StrNoCount.Substring(0, 12);
             LogAdd("StrData:" + StrData);
             StrSystem = _str.Substring(12, _str.Length - 12);
             LogAdd("StrSystem:" + StrSystem);
@@ -495,6 +523,102 @@ namespace TCPIP
 
             }
         }
+
+        private void CheckStreamFunReceive(string _str)
+        {
+            string StrCount = _str.Substring(0, 8);  // 取出有多少的個數
+            int intCount = 0;
+            string StrNoCount = _str.Substring(8, _str.Length - 8);
+            // string StrSystem = "";
+
+
+            int.TryParse(StrCount, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo, out intCount);
+            byte[] mybytes = CharClass.ConvertHexStrToByteArray(StrNoCount); //轉成byte 
+            if (intCount != mybytes.Length ) //判斷資料個數是否正確
+            {  //有異常
+                return;
+            }
+            
+            if (mybytes.Length < 10)
+            {  //有異常
+                return;
+            }
+            string strRole;
+            if (mybytes[0] == 0x81)
+            { //由Equipment 發出
+                strRole = "Equipment";
+            }
+            else if (mybytes[0] == 0x01)
+            {//HOST 發出
+                strRole = "HOST";
+            }
+            else
+            {
+                strRole = "";
+            }
+
+            string DeviceID;
+            DeviceID = mybytes[1].ToString("X2"); //X2 16進制字串
+
+
+            bool isNeedReply = false;
+            int intQuotient = ((int)mybytes[2] / 16);
+            //-------------- 商數等於8 是0x80意思
+            if (intQuotient == 8)
+            {
+                //0x80 必須回復
+                isNeedReply = true;
+            }
+            //--------------
+            ////--------------另外一種 
+            //if ((mybytes[2] & 0x80) == 0x80) //用& 比較不是有0x80   (0x75 & 0x70) >> 0x70
+            //{
+            //    //0x80 必須回復
+            //    isNeedReply = true;
+            //}
+            ////-------------- 也可以用2進制取得 128的位置換算是不是等於 1xxx xxxx 
+            string strStream;
+            int intStream;
+
+            intStream = (int)mybytes[2] - (intQuotient * 16); // 取除16的餘數，利用取商乘 16 用乘法運算比 %取餘還快
+            ////----------------------- 另外一種轉法 轉2進制 超過4位數的不要 即可取0~15數值
+            //strStream = Convert.ToString((int)mybytes[2], 2);
+            //strStream = strStream.Substring(strStream.Length - 4, 4);
+            //intStream = Convert.ToInt32(strStream, 2);
+            ////-----------------------
+            strStream = intStream.ToString();
+
+            string strFunctions;
+            int intFunctions;
+
+            intFunctions = (int)mybytes[3]; //強制轉型
+            strFunctions = intFunctions.ToString();
+
+
+            //最後一個區塊
+            string strLastBlock;
+            strLastBlock = mybytes[4].ToString("X2");
+            //第一個區塊
+            string strFristBlock;
+            strFristBlock = mybytes[5].ToString("X2");
+
+           
+            //SystemByte 
+            string strSystemByte;
+            strSystemByte = mybytes[6].ToString("X2") + mybytes[7].ToString("X2") +
+                            mybytes[8].ToString("X2") + mybytes[9].ToString("X2");
+
+            string StrData = "";
+            //for (int i = 9; i < mybytes.Length; i++)
+            //{
+            //    StrData += mybytes[i].ToString("X2");
+            //}
+            StrData = StrNoCount.Substring(10 * 2, StrNoCount.Length  - 10 * 2);
+
+
+
+        }
+
 
         private void PLibrary_DisConnect(object sender, EventArgs e)
         {

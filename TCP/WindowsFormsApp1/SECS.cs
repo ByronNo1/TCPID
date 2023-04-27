@@ -189,6 +189,8 @@ namespace WindowsFormsApp1
             string dataStr;
             string TempDataStr;
             string DataStrB;
+            int intDataNLB;
+            int intInputTypeNLB = 0;
             if (_dataLenI == 0)
             {
                 if ((data.Length - ((int)(data.Length / 2)) * 2) != 0) //有餘數代表輸入資料有問題
@@ -202,16 +204,48 @@ namespace WindowsFormsApp1
             }
             //如果有輸入依照輸入的個數,例如LIST會輸入""，但是後面有幾LIST
             dataLen = _dataLenI;
+            if (dataLen <= 0xff)  //判斷是否資料長度屬於哪一個
+            {
+                intDataNLB = 0;
+            }
+            else if (dataLen <= 0xffff)  //判斷是否資料長度屬於哪一個
+            {
+                intDataNLB = 1;
+            }
+            else if (dataLen <= 0xffffff)  //判斷是否資料長度屬於哪一個
+            {
+                intDataNLB = 2;
+            }
+            else
+            {
+                return "";
+            }
+
 
             switch (dataType)
             {
                 case DataType.LIST:
+                case DataType.LIST_2:
+                case DataType.LIST_3:
                     {
+                        intInputTypeNLB = dataType - DataType.LIST ;
+                        if (intInputTypeNLB >= intDataNLB)  //等於大於 表示輸入的沒有問題 就算用三個byte表達 資料為1也沒問題
+                        {
+                           
+                        }
+                        else
+                        {   //如果資料超過原本預定的byte可以表達，要新增
+                            dataType = dataType + (intDataNLB - intInputTypeNLB);
+                        }
+
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
+                        intDataNLB = ((int)dataType);
                         dataLenS = dataLen.ToString("x2").ToUpper().Trim();
+                        dataLenS = dataLenS.PadLeft(intDataNLB * 2, '0'); //依照 LIST 1 2 3 來傳
                         TempStr = dataTypeS + dataLenS;
                     }
                     break;
+
                 case DataType.BOOLEAN:
                     {  //有可能有0x
                         dataTypeS = ((int)dataType).ToString("x2").ToUpper().Trim();
@@ -219,7 +253,7 @@ namespace WindowsFormsApp1
 
                         if (data != "0" || data.ToUpper() != "F")
                         {
-                            data = "FF";
+                            data = "01";
                         }
                         else
                         {
