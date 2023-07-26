@@ -55,8 +55,12 @@
             this.txtReceiveMsg = new System.Windows.Forms.TextBox();
             this.labSend = new System.Windows.Forms.Label();
             this.labReceive = new System.Windows.Forms.Label();
-            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.listReceive = new System.Windows.Forms.ListBox();
             this.listBoxLog = new System.Windows.Forms.ListBox();
+            this.labReceiveList = new System.Windows.Forms.Label();
+            this.labSendList = new System.Windows.Forms.Label();
+            this.listSend = new System.Windows.Forms.ListBox();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.groBoxEthernetSetting.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picEthernetConnect)).BeginInit();
             this.palEthernetSetting.SuspendLayout();
@@ -64,11 +68,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.picGreen)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGray)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picYellow)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnTest
             // 
-            this.btnTest.Location = new System.Drawing.Point(733, 130);
+            this.btnTest.Location = new System.Drawing.Point(1341, 27);
             this.btnTest.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(261, 116);
@@ -97,7 +102,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(1077, 552);
+            this.button1.Location = new System.Drawing.Point(1636, 27);
             this.button1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(261, 116);
@@ -186,15 +191,17 @@
             // groBoxEthernetSetting
             // 
             this.groBoxEthernetSetting.BackColor = System.Drawing.Color.LightBlue;
+            this.groBoxEthernetSetting.Controls.Add(this.radbtnActive);
             this.groBoxEthernetSetting.Controls.Add(this.btnConnect);
+            this.groBoxEthernetSetting.Controls.Add(this.radbtnPassive);
             this.groBoxEthernetSetting.Controls.Add(this.picEthernetConnect);
             this.groBoxEthernetSetting.Controls.Add(this.btnDisConnected);
             this.groBoxEthernetSetting.Controls.Add(this.palEthernetSetting);
-            this.groBoxEthernetSetting.Location = new System.Drawing.Point(1043, 12);
+            this.groBoxEthernetSetting.Location = new System.Drawing.Point(724, 56);
             this.groBoxEthernetSetting.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.groBoxEthernetSetting.Name = "groBoxEthernetSetting";
             this.groBoxEthernetSetting.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groBoxEthernetSetting.Size = new System.Drawing.Size(320, 485);
+            this.groBoxEthernetSetting.Size = new System.Drawing.Size(577, 383);
             this.groBoxEthernetSetting.TabIndex = 6;
             this.groBoxEthernetSetting.TabStop = false;
             this.groBoxEthernetSetting.Text = "Ethernet Setting";
@@ -202,10 +209,10 @@
             // btnConnect
             // 
             this.btnConnect.BackColor = System.Drawing.Color.PaleGreen;
-            this.btnConnect.Location = new System.Drawing.Point(30, 411);
+            this.btnConnect.Location = new System.Drawing.Point(322, 128);
             this.btnConnect.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(124, 53);
+            this.btnConnect.Size = new System.Drawing.Size(196, 65);
             this.btnConnect.TabIndex = 7;
             this.btnConnect.Text = "Connect";
             this.btnConnect.UseVisualStyleBackColor = false;
@@ -214,7 +221,7 @@
             // picEthernetConnect
             // 
             this.picEthernetConnect.Image = global::WindowsFormsApp1.Properties.Resources.gray;
-            this.picEthernetConnect.Location = new System.Drawing.Point(256, 0);
+            this.picEthernetConnect.Location = new System.Drawing.Point(422, 44);
             this.picEthernetConnect.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.picEthernetConnect.Name = "picEthernetConnect";
             this.picEthernetConnect.Size = new System.Drawing.Size(47, 55);
@@ -225,10 +232,10 @@
             // btnDisConnected
             // 
             this.btnDisConnected.BackColor = System.Drawing.Color.PapayaWhip;
-            this.btnDisConnected.Location = new System.Drawing.Point(167, 411);
+            this.btnDisConnected.Location = new System.Drawing.Point(322, 204);
             this.btnDisConnected.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnDisConnected.Name = "btnDisConnected";
-            this.btnDisConnected.Size = new System.Drawing.Size(124, 50);
+            this.btnDisConnected.Size = new System.Drawing.Size(196, 81);
             this.btnDisConnected.TabIndex = 7;
             this.btnDisConnected.Text = "DisConnected";
             this.btnDisConnected.UseVisualStyleBackColor = false;
@@ -236,8 +243,6 @@
             // 
             // palEthernetSetting
             // 
-            this.palEthernetSetting.Controls.Add(this.radbtnActive);
-            this.palEthernetSetting.Controls.Add(this.radbtnPassive);
             this.palEthernetSetting.Controls.Add(this.txtDeviceID);
             this.palEthernetSetting.Controls.Add(this.labLocalPort);
             this.palEthernetSetting.Controls.Add(this.labDeviceID);
@@ -248,16 +253,16 @@
             this.palEthernetSetting.Controls.Add(this.txtLocalIP);
             this.palEthernetSetting.Controls.Add(this.labRemoteIP);
             this.palEthernetSetting.Controls.Add(this.txtRemotePort);
-            this.palEthernetSetting.Location = new System.Drawing.Point(16, 39);
+            this.palEthernetSetting.Location = new System.Drawing.Point(16, 29);
             this.palEthernetSetting.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.palEthernetSetting.Name = "palEthernetSetting";
-            this.palEthernetSetting.Size = new System.Drawing.Size(291, 379);
+            this.palEthernetSetting.Size = new System.Drawing.Size(287, 334);
             this.palEthernetSetting.TabIndex = 6;
             // 
             // radbtnActive
             // 
             this.radbtnActive.AutoSize = true;
-            this.radbtnActive.Location = new System.Drawing.Point(174, 341);
+            this.radbtnActive.Location = new System.Drawing.Point(333, 72);
             this.radbtnActive.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.radbtnActive.Name = "radbtnActive";
             this.radbtnActive.Size = new System.Drawing.Size(79, 22);
@@ -270,7 +275,7 @@
             // 
             this.radbtnPassive.AutoSize = true;
             this.radbtnPassive.Checked = true;
-            this.radbtnPassive.Location = new System.Drawing.Point(47, 341);
+            this.radbtnPassive.Location = new System.Drawing.Point(333, 44);
             this.radbtnPassive.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.radbtnPassive.Name = "radbtnPassive";
             this.radbtnPassive.Size = new System.Drawing.Size(85, 22);
@@ -282,7 +287,7 @@
             // picRed
             // 
             this.picRed.Image = global::WindowsFormsApp1.Properties.Resources.red;
-            this.picRed.Location = new System.Drawing.Point(1009, -10);
+            this.picRed.Location = new System.Drawing.Point(1011, -5);
             this.picRed.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.picRed.Name = "picRed";
             this.picRed.Size = new System.Drawing.Size(47, 55);
@@ -294,7 +299,7 @@
             // picGreen
             // 
             this.picGreen.Image = global::WindowsFormsApp1.Properties.Resources.green;
-            this.picGreen.Location = new System.Drawing.Point(1071, -10);
+            this.picGreen.Location = new System.Drawing.Point(1073, -5);
             this.picGreen.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.picGreen.Name = "picGreen";
             this.picGreen.Size = new System.Drawing.Size(47, 55);
@@ -306,7 +311,7 @@
             // picGray
             // 
             this.picGray.Image = global::WindowsFormsApp1.Properties.Resources.gray;
-            this.picGray.Location = new System.Drawing.Point(1136, -10);
+            this.picGray.Location = new System.Drawing.Point(1138, -5);
             this.picGray.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.picGray.Name = "picGray";
             this.picGray.Size = new System.Drawing.Size(47, 55);
@@ -318,7 +323,7 @@
             // picYellow
             // 
             this.picYellow.Image = global::WindowsFormsApp1.Properties.Resources.yellow;
-            this.picYellow.Location = new System.Drawing.Point(1204, -10);
+            this.picYellow.Location = new System.Drawing.Point(1206, -5);
             this.picYellow.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.picYellow.Name = "picYellow";
             this.picYellow.Size = new System.Drawing.Size(47, 55);
@@ -332,7 +337,7 @@
             this.txtSendMsg.BackColor = System.Drawing.SystemColors.WindowText;
             this.txtSendMsg.Font = new System.Drawing.Font("標楷體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.txtSendMsg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.txtSendMsg.Location = new System.Drawing.Point(12, 769);
+            this.txtSendMsg.Location = new System.Drawing.Point(14, 42);
             this.txtSendMsg.Multiline = true;
             this.txtSendMsg.Name = "txtSendMsg";
             this.txtSendMsg.Size = new System.Drawing.Size(677, 187);
@@ -343,7 +348,7 @@
             this.txtReceiveMsg.BackColor = System.Drawing.SystemColors.WindowText;
             this.txtReceiveMsg.Font = new System.Drawing.Font("標楷體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.txtReceiveMsg.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.txtReceiveMsg.Location = new System.Drawing.Point(707, 769);
+            this.txtReceiveMsg.Location = new System.Drawing.Point(14, 597);
             this.txtReceiveMsg.Multiline = true;
             this.txtReceiveMsg.Name = "txtReceiveMsg";
             this.txtReceiveMsg.Size = new System.Drawing.Size(677, 187);
@@ -353,7 +358,7 @@
             // 
             this.labSend.AutoSize = true;
             this.labSend.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.labSend.Location = new System.Drawing.Point(12, 742);
+            this.labSend.Location = new System.Drawing.Point(14, 15);
             this.labSend.Name = "labSend";
             this.labSend.Size = new System.Drawing.Size(61, 24);
             this.labSend.TabIndex = 10;
@@ -363,54 +368,97 @@
             // 
             this.labReceive.AutoSize = true;
             this.labReceive.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.labReceive.Location = new System.Drawing.Point(703, 742);
+            this.labReceive.Location = new System.Drawing.Point(10, 570);
             this.labReceive.Name = "labReceive";
             this.labReceive.Size = new System.Drawing.Size(88, 24);
             this.labReceive.TabIndex = 10;
             this.labReceive.Text = "Receive:";
             // 
-            // listBox1
+            // listReceive
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 18;
-            this.listBox1.Location = new System.Drawing.Point(12, 12);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(500, 706);
-            this.listBox1.TabIndex = 11;
+            this.listReceive.Font = new System.Drawing.Font("新細明體", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.listReceive.FormattingEnabled = true;
+            this.listReceive.ItemHeight = 28;
+            this.listReceive.Location = new System.Drawing.Point(14, 829);
+            this.listReceive.Name = "listReceive";
+            this.listReceive.Size = new System.Drawing.Size(677, 256);
+            this.listReceive.TabIndex = 11;
             // 
             // listBoxLog
             // 
             this.listBoxLog.FormattingEnabled = true;
             this.listBoxLog.ItemHeight = 18;
-            this.listBoxLog.Location = new System.Drawing.Point(534, 423);
+            this.listBoxLog.Location = new System.Drawing.Point(724, 469);
             this.listBoxLog.Name = "listBoxLog";
-            this.listBoxLog.Size = new System.Drawing.Size(382, 274);
+            this.listBoxLog.Size = new System.Drawing.Size(577, 616);
             this.listBoxLog.TabIndex = 11;
+            // 
+            // labReceiveList
+            // 
+            this.labReceiveList.AutoSize = true;
+            this.labReceiveList.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.labReceiveList.Location = new System.Drawing.Point(14, 797);
+            this.labReceiveList.Name = "labReceiveList";
+            this.labReceiveList.Size = new System.Drawing.Size(88, 24);
+            this.labReceiveList.TabIndex = 10;
+            this.labReceiveList.Text = "Receive:";
+            // 
+            // labSendList
+            // 
+            this.labSendList.AutoSize = true;
+            this.labSendList.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.labSendList.Location = new System.Drawing.Point(18, 251);
+            this.labSendList.Name = "labSendList";
+            this.labSendList.Size = new System.Drawing.Size(61, 24);
+            this.labSendList.TabIndex = 10;
+            this.labSendList.Text = "Send:";
+            // 
+            // listSend
+            // 
+            this.listSend.Font = new System.Drawing.Font("新細明體", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.listSend.FormattingEnabled = true;
+            this.listSend.ItemHeight = 28;
+            this.listSend.Location = new System.Drawing.Point(18, 283);
+            this.listSend.Name = "listSend";
+            this.listSend.Size = new System.Drawing.Size(677, 256);
+            this.listSend.TabIndex = 11;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.labSend);
+            this.panel1.Controls.Add(this.listBoxLog);
+            this.panel1.Controls.Add(this.listSend);
+            this.panel1.Controls.Add(this.labSendList);
+            this.panel1.Controls.Add(this.groBoxEthernetSetting);
+            this.panel1.Controls.Add(this.listReceive);
+            this.panel1.Controls.Add(this.picRed);
+            this.panel1.Controls.Add(this.labReceiveList);
+            this.panel1.Controls.Add(this.picGreen);
+            this.panel1.Controls.Add(this.labReceive);
+            this.panel1.Controls.Add(this.picGray);
+            this.panel1.Controls.Add(this.picYellow);
+            this.panel1.Controls.Add(this.txtReceiveMsg);
+            this.panel1.Controls.Add(this.txtSendMsg);
+            this.panel1.Location = new System.Drawing.Point(2, 12);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1316, 1113);
+            this.panel1.TabIndex = 12;
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1396, 968);
-            this.Controls.Add(this.listBoxLog);
-            this.Controls.Add(this.listBox1);
-            this.Controls.Add(this.labReceive);
-            this.Controls.Add(this.labSend);
-            this.Controls.Add(this.txtReceiveMsg);
-            this.Controls.Add(this.txtSendMsg);
-            this.Controls.Add(this.picYellow);
-            this.Controls.Add(this.picGray);
-            this.Controls.Add(this.picGreen);
-            this.Controls.Add(this.picRed);
-            this.Controls.Add(this.groBoxEthernetSetting);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(2484, 1137);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.btnTest);
+            this.Controls.Add(this.button1);
             this.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.Name = "Main";
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Main_FormClosing);
             this.Load += new System.EventHandler(this.Main_Load);
             this.groBoxEthernetSetting.ResumeLayout(false);
+            this.groBoxEthernetSetting.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picEthernetConnect)).EndInit();
             this.palEthernetSetting.ResumeLayout(false);
             this.palEthernetSetting.PerformLayout();
@@ -418,8 +466,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.picGreen)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGray)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picYellow)).EndInit();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -452,8 +501,12 @@
         private System.Windows.Forms.TextBox txtReceiveMsg;
         private System.Windows.Forms.Label labSend;
         private System.Windows.Forms.Label labReceive;
-        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.ListBox listReceive;
         private System.Windows.Forms.ListBox listBoxLog;
+        private System.Windows.Forms.Label labReceiveList;
+        private System.Windows.Forms.Label labSendList;
+        private System.Windows.Forms.ListBox listSend;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 

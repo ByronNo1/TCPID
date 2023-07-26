@@ -331,7 +331,6 @@ namespace TCPIP
                 int intGetL;
                 do // 當有資料傳入時將資料顯示至介面上
                 {
-
                     if (stream.DataAvailable && (intGetL = stream.Read(btDatas, 0, btDatas.Length)) != 0)
                     {
                         // sData = System.Text.Encoding.ASCII.GetString(btDatas, 0, i);

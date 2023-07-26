@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -409,6 +410,215 @@ namespace WindowsFormsApp1
             return TempStr;
         }
 
+
+
+        public static List<SECSItem> DataInItem(string _Str)
+        {
+            string _TmpStr = _Str;
+            if (_TmpStr.Length < 6)
+            {
+                return null;
+            }
+            List<DataType> tmpDataInItem = new List<DataType>();
+            List<byte> tmpByte = (CharClass.ConvertHexStrToByteArray(_Str)).ToList();
+            DataType dataType = new DataType();
+            DataType NewDataType = new DataType();
+            SECSItem tSECSItem ;
+            int intNLB = 1;
+            int intLEVEL = 0;
+            List<int> listCount = new List<int>();
+
+            dataType = (DataType)tmpByte[0];
+
+            intNLB = GetNLB(dataType, ref NewDataType);
+            switch (NewDataType)
+            {
+                case DataType.LIST:
+                case DataType.LIST_2:
+                case DataType.LIST_3:
+                    {
+                        
+                    }
+                break;
+
+                case DataType.BOOLEAN:
+                case DataType.BOOLEAN +1:
+                case DataType.BOOLEAN +2:
+                    {  //有可能有0x
+                        
+                        
+                    }
+                    break;
+                case DataType.BINARY:
+                case DataType.BINARY + 1:
+                case DataType.BINARY + 2:
+                    {
+
+                    }
+                    break;
+                case DataType.JIS:
+                case DataType.JIS + 1:
+                case DataType.JIS + 2:
+                    {
+                        
+                    }
+                    break;
+                case DataType.ASCII:
+                case DataType.ASCII + 1:
+                case DataType.ASCII + 2:
+                    {
+                        
+                    }
+                    break;
+                case DataType.INT_1:
+                case DataType.INT_1 + 1:
+                case DataType.INT_1 + 2:
+                    {
+                      
+                    }
+                    break;
+                case DataType.INT_2:
+                case DataType.INT_2 + 1:
+                case DataType.INT_2 + 2:
+                    {
+
+                    }
+                    break;
+                case DataType.INT_4:
+                case DataType.INT_4 + 1:
+                case DataType.INT_4 + 2:
+                    {
+                      
+                    }
+                    break;
+                case DataType.INT_8:
+                case DataType.INT_8 + 1:
+                case DataType.INT_8 + 2:
+                    {
+                       
+                    }
+                    break;
+                case DataType.UINT_1:
+                case DataType.UINT_1 + 1:
+                case DataType.UINT_1 + 2:
+                    {
+                      
+                    }
+                    break;
+                case DataType.UINT_2:
+                case DataType.UINT_2 + 1:
+                case DataType.UINT_2 + 2:
+                    {
+                       
+                    }
+                    break;
+                case DataType.UINT_4:
+                case DataType.UINT_4 + 1:
+                case DataType.UINT_4 + 2:
+                    {
+                     
+                    }
+                    break;
+                case DataType.UINT_8:
+                case DataType.UINT_8 + 1:
+                case DataType.UINT_8 + 2:
+                    {
+                        
+                    }
+                    break;
+                case DataType.FT_4:
+                case DataType.FT_4 + 1:
+                case DataType.FT_4 + 2:
+                    {
+                        
+                    }
+                    break;
+                case DataType.FT_8:
+                case DataType.FT_8 + 1:
+                case DataType.FT_8 + 2:
+                    {
+                        
+
+                    }
+                    break;
+            }
+
+
+            return null;
+        }
+
+        private static int GetNLB(DataType _dataType, ref DataType _NewdataType)
+        {
+
+            return GetNLB((byte)_dataType, ref _NewdataType);
+        }
+         private static int GetNLB(byte _dataType,ref DataType _NewdataType )
+        {
+            int _intNLB = 0;
+            _NewdataType = (DataType)_dataType;
+            switch (_dataType)
+            {
+                case (byte)DataType.LIST:
+                case (byte)DataType.ASCII:
+                    _intNLB = 1;
+                    break;
+                case (byte)DataType.LIST_2:
+                case (byte)DataType.ASCII_2:
+                    _intNLB = 2;
+                    break;
+                case (byte)DataType.LIST_3:
+                case (byte)DataType.ASCII_3:
+                    _intNLB = 3;
+                    break;
+                default:
+                    foreach (object value in Enum.GetValues(typeof(DataType)))
+                    {
+
+                        if ((int)_dataType - (int)value >= 0 && (int)_dataType - (int)value <=2)
+                        {
+                            _intNLB = (int)_dataType - (int)value + 1;
+                            Console.WriteLine("NLB:" + _intNLB);
+                            Console.WriteLine("_dataType:" + _dataType.ToString("X2"));
+                            break;
+                        } 
+                    }
+                    break;
+            }
+            //foreach (string name in Enum.GetNames(typeof(EnumType)))
+            //{
+            //    Console.WriteLine(name);
+            //}
+
+            //foreach (object value in Enum.GetValues(typeof(EnumType)))
+            //{
+            //    Console.WriteLine((Int32)value);
+            //}
+
+
+            //DataType.BINARY 
+            //DataType.BOOLEAN   
+            //DataType.INT_8 
+            //DataType.INT_1  
+            //DataType.INT_2 
+            //DataType.INT_4  
+            //DataType.FT_8  
+            //DataType.FT_4  
+            //DataType.UINT_8  
+            //DataType.UINT_1  
+            //DataType.UINT_2  
+            //DataType.UINT_4  
+            //DataType.CHAR_2
+            //DataType.JIS
+
+
+
+            return _intNLB;
+
+        }
+
+
+
+    
     }
 
 
@@ -434,7 +644,7 @@ namespace WindowsFormsApp1
             strName = _strName;
             Description = _Description;
             ListSecSItems = _ListSecSItems;
-            if (_DataType == DataType.LIST)
+            if (_DataType == DataType.LIST || _DataType == DataType.LIST_2 || _DataType == DataType.LIST_3)
             {
                 ListSecSItems = new List<SECSItem>();
             }
@@ -529,8 +739,6 @@ namespace WindowsFormsApp1
 
             // AddB(new SECSItem(_SECSItem));
         }
-
-
 
         private void ListSecSItemsTotmpListSItemsNolevel()
         {

@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApp1;
+using static WindowsFormsApp1.SECS;
 
 namespace TCPIP
 {
@@ -75,7 +76,14 @@ namespace TCPIP
         {
             try
             {
-                CheckStreamFunReceive("0000000C0000060C0000000080022100");
+                //DataType tt = new DataType();
+                //int i  = SECS.GetNLB((byte)DataType.INT_8 + 2, ref tt);
+
+                //CheckStreamFunReceive("0000000C0000060C0000000080022100");
+
+                //S1F3
+                //"000000420000810300000042F3C60109B104000186A1B104000007D2B104000007D3B10400000003B104000007D1B104000007D4B10400000027B10400000028B10400000029";
+                CheckStreamFunReceive("000000420000810300000042F3C60109B104000186A1B104000007D2B104000007D3B10400000003B104000007D1B104000007D4B10400000027B10400000028B10400000029");
                 //byte tbyte = 0x8F;
 
                 //if ((tbyte & 0x80) == 0x80)
@@ -337,23 +345,42 @@ namespace TCPIP
             listBoxLog.Items.Add(_str);
         }
 
-        private void listBox1ADD(string _str)
+        private void listReceiveADD(string _str)
         {
-            if (listBox1.InvokeRequired)
+            if (listReceive.InvokeRequired)
             {
-                listBox1.BeginInvoke(new Action(() =>
+                listReceive.BeginInvoke(new Action(() =>
                 {
-                    listBox1ADD(_str);
+                    listReceiveADD(_str);
                 }));
                 return;
             }
 
-            if (listBox1.Items.Count > 100)
+            if (listReceive.Items.Count > 100)
             {
-                listBox1.Items.Clear();
+                listReceive.Items.Clear();
             }
-            listBox1.Items.Add(_str);
+            listReceive.Items.Add(_str);
         }
+
+        private void listSnedADD(string _str)
+        {
+            if (listSend.InvokeRequired)
+            {
+                listSend.BeginInvoke(new Action(() =>
+                {
+                    listSnedADD(_str);
+                }));
+                return;
+            }
+
+            if (listSend.Items.Count > 100)
+            {
+                listSend.Items.Clear();
+            }
+            listSend.Items.Add(_str);
+        }
+
 
         private void ParserReceiveMsg(List<string> _listStr) // 解析收到字串
         {
@@ -414,7 +441,7 @@ namespace TCPIP
                                 }
                                 if (TmpStrData != "")
                                 {
-                                    listBox1ADD(StrCount + TmpStrData);
+                                    listReceiveADD(StrCount + TmpStrData);
                                     QueReceiveData.Enqueue(StrCount + TmpStrData); //整理過的DATA 紀錄到Queue，準備之後回復用
                                 }
                             } while (TmpStrNext != "");
@@ -477,13 +504,13 @@ namespace TCPIP
             string StrCount = _str.Substring(0, 8);  // 取出有多少的個數
             string StrData = _str.Substring(8, _str.Length - 8);
 
-            if (StrData.Substring(0, 10) == "FFFF000000") //這是 T1~T9之類的
+            if (StrData.Substring(0, 4) == "FFFF") //這是 T1~T9之類的
             {
                 CheckSecsSession(_str);
             }
             else
             {
-
+                CheckStreamFunReceive(_str);
             }
 
 
@@ -497,7 +524,7 @@ namespace TCPIP
 
             string StrData = StrNoCount.Substring(0, 12);
             LogAdd("StrData:" + StrData);
-            StrSystem = _str.Substring(12, _str.Length - 12);
+            StrSystem = StrNoCount.Substring(12, StrNoCount.Length - 12);
             LogAdd("StrSystem:" + StrSystem);
             switch (StrData)
             {
@@ -615,9 +642,9 @@ namespace TCPIP
             //}
             StrData = StrNoCount.Substring(10 * 2, StrNoCount.Length  - 10 * 2);
 
+            SECS.DataInItem(StrData);
 
-
-        }
+         }
 
 
         private void PLibrary_DisConnect(object sender, EventArgs e)
@@ -683,6 +710,7 @@ namespace TCPIP
                 sStr[1] = _str;
                 sStr[2] = strSystem;
                 pLibrary.Send(_strSend);
+                listSnedADD(_strSend);
             }
         }
 
